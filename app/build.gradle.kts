@@ -10,6 +10,7 @@ dependencies {
     implementation("io.vertx:vertx-config:$vertxVersion")
     implementation("io.vertx:vertx-config-yaml:$vertxVersion")
     implementation("io.vertx:vertx-pg-client:$vertxVersion")
+    implementation("io.vertx:vertx-web-validation:$vertxVersion")
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
