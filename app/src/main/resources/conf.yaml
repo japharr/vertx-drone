@@ -1,3 +1,10 @@
 http:
   port: 8083
   context-path: /api/v1
+
+db:
+  host: 127.0.0.1
+  port: 5432
+  database: drones_db
+  user: devuser
+  password: pass123
