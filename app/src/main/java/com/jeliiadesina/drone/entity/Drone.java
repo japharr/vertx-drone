@@ -15,4 +15,10 @@ public abstract class Drone {
   public static final List<String> ACCEPTABLE_MODELS =
       List.of("Lightweight", "Middleweight", "Cruiserweight", "Heavyweight");
   public static final double WEIGHT_LIMIT_MAX = 500.0;
+
+  public static final String REGISTER_ADDRESS = "drone.register";
+
+  public enum StateType{
+    IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING
+  }
 }

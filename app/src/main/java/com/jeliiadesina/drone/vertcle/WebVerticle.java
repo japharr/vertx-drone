@@ -5,6 +5,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -29,10 +30,12 @@ import static io.vertx.json.schema.common.dsl.Schemas.*;
 public class WebVerticle extends AbstractVerticle {
   private final JsonObject httpConf = new JsonObject();
   private SchemaParser schemaParser;
+  private EventBus eventBus;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     httpConf.mergeIn(config().getJsonObject("http"));
+    eventBus = vertx.eventBus();
 
     startWebApp()
         .onComplete(http ->
@@ -111,7 +114,18 @@ public class WebVerticle extends AbstractVerticle {
   }
 
   private void registerDrone(RoutingContext ctx) {
+    JsonObject body = jsonBody(ctx);
 
+    JsonObject drone = new JsonObject()
+        .put(Drone.SERIAL_NUMBER, body.getString(Drone.SERIAL_NUMBER))
+        .put(Drone.MODEL, body.getString(Drone.MODEL))
+        .put(Drone.WEIGHT_LIMIT, body.getDouble(Drone.WEIGHT_LIMIT))
+        .put(Drone.BATTERY_CAPACITY, body.getDouble(Drone.BATTERY_CAPACITY))
+        .put(Drone.STATE, Drone.StateType.IDLE);
+
+    eventBus.request(Drone.REGISTER_ADDRESS, drone, res -> {
+      
+    });
   }
 
   private void loadAllDrones(RoutingContext ctx) {
