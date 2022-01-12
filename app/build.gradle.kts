@@ -3,6 +3,7 @@ dependencies {
     val vertxVersion = project.extra["vertxVersion"]
     val flywayVersion = project.extra["flywayVersion"]
     val jupiterVersion = project.extra["jupiterVersion"]
+    val postgresVersion = project.extra["postgresVersion"]
     val logbackClassicVersion = project.extra["logbackClassicVersion"]
     val postgresTestContainerVersion = project.extra["postgresTestContainerVersion"]
 
@@ -12,6 +13,7 @@ dependencies {
     implementation("io.vertx:vertx-pg-client:$vertxVersion")
     implementation("io.vertx:vertx-web-validation:$vertxVersion")
 
+    implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
     implementation("org.testcontainers:postgresql:$postgresTestContainerVersion")
