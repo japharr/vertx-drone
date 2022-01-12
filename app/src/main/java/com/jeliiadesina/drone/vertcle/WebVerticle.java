@@ -12,14 +12,23 @@ import io.vertx.ext.web.LanguageHeader;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.validation.*;
+import io.vertx.ext.web.validation.builder.Bodies;
+import io.vertx.json.schema.SchemaParser;
+import io.vertx.json.schema.SchemaRouter;
+import io.vertx.json.schema.SchemaRouterOptions;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import static io.vertx.json.schema.common.dsl.Schemas.*;
+
 public class WebVerticle extends AbstractVerticle {
   private final JsonObject httpConf = new JsonObject();
+  private SchemaParser schemaParser;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -40,6 +49,8 @@ public class WebVerticle extends AbstractVerticle {
 
   private Future<HttpServer> startWebApp() {
     Router router = Router.router(vertx);
+    SchemaRouter schemaRouter = SchemaRouter.create(vertx, new SchemaRouterOptions());
+    schemaParser = SchemaParser.createDraft201909SchemaParser(schemaRouter);
 
     BodyHandler bodyHandler = BodyHandler.create();
     router.post().handler(bodyHandler);
@@ -50,12 +61,32 @@ public class WebVerticle extends AbstractVerticle {
 
     router.get(basePath + "/drones").handler(this::loadAllDrones);
     router.post(basePath + "/drones")
+        .handler(registerDroneValidationHandler())
         .handler(this::validateRegistration)
         .handler(this::registerDrone);
+
+    router.errorHandler(400, ctx -> {
+      if (ctx.failure() instanceof BadRequestException) {
+        ctx.response().setStatusCode(400).end(((BadRequestException) ctx.failure()).toJson().encodePrettily());
+      }
+    });
 
     return Future.future(promise -> vertx.createHttpServer()
         .requestHandler(router)
         .listen(port, promise));
+  }
+
+  private ValidationHandler registerDroneValidationHandler() {
+    ObjectSchemaBuilder bodySchemaBuilder = objectSchema()
+        .property(Drone.SERIAL_NUMBER, stringSchema())
+        .property(Drone.MODEL, stringSchema())
+        .property(Drone.WEIGHT_LIMIT, numberSchema())
+        .property(Drone.BATTERY_CAPACITY, numberSchema());
+
+    return ValidationHandler
+        .builder(schemaParser)
+        .body(Bodies.json(bodySchemaBuilder))
+        .body(Bodies.formUrlEncoded(bodySchemaBuilder)).build();
   }
 
   private void validateRegistration(RoutingContext ctx) {
