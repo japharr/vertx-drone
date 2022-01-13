@@ -69,6 +69,7 @@ public class WebVerticle extends AbstractVerticle {
     var port = httpConf.getInteger("port", 8080);
 
     router.get(basePath + "/drones").handler(this::loadAllDrones);
+    router.get(basePath + "/drones/:state").handler(this::loadByState);
     router.post(basePath + "/drones")
         .handler(registerDroneValidationHandler())
         .handler(this::validateRegistration)
@@ -141,7 +142,26 @@ public class WebVerticle extends AbstractVerticle {
   }
 
   private void loadAllDrones(RoutingContext ctx) {
+    eventBus.request(Drone.FETCH_ALL_ADDRESS, new JsonObject(), res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200)
+            .end(((JsonArray)res.result().body()).encodePrettily());
+      } else {
+        ctx.fail(500);
+      }
+    });
+  }
 
+  private void loadByState(RoutingContext ctx) {
+    String state = ctx.pathParam("state");
+    eventBus.request(Drone.FETCH_BY_STATE_ADDRESS, new JsonObject().put("state", state), res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200)
+            .end(((JsonArray)res.result().body()).encodePrettily());
+      } else {
+        ctx.fail(500);
+      }
+    });
   }
 
   private JsonArray anyRegistrationFieldIsMissing(JsonObject body, RoutingContext ctx) {

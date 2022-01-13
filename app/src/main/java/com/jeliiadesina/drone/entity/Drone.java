@@ -19,6 +19,8 @@ public interface Drone {
 
   // event-buss addresses
   public static final String REGISTER_ADDRESS = "drone.register";
+  public static final String FETCH_ALL_ADDRESS = "drone.fetch-all";
+  public static final String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
 
   public enum StateType{
     IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING
@@ -33,5 +35,14 @@ public interface Drone {
 
   static String countBySerialNumber() {
     return "SELECT count(*) FROM drones WHERE serial_number = $1";
+  }
+
+  static String selectAllDrones() {
+    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones";
+  }
+
+  static String selectDronesByState() {
+    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
+        "WHERE state = $1";
   }
 }

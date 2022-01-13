@@ -41,6 +41,8 @@ public class DatabaseVerticle extends AbstractVerticle {
 
   private Future<Void> configureEventBusConsumers(Void unused) {
     vertx.eventBus().consumer(Drone.REGISTER_ADDRESS).handler(droneService::registerDrone);
+    vertx.eventBus().consumer(Drone.FETCH_ALL_ADDRESS).handler(droneService::fetchAllDrones);
+    vertx.eventBus().consumer(Drone.FETCH_BY_STATE_ADDRESS).handler(droneService::fetchDronesByState);
 
     return Future.future(Promise::complete);
   }
