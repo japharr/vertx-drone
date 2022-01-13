@@ -26,10 +26,14 @@ public interface Medication {
 
   // sql queries
   static String insertOneQuery() {
-    return "INSERT INTO medications (uuid, name, weight, code) VALUES($1, $2, $3, $4, current_timestamp, current_timestamp)";
+    return "INSERT INTO medications (uuid, name, weight, code, created_date, last_modified_date ) VALUES($1, $2, $3, $4, current_timestamp, current_timestamp)";
   }
 
   static String countByNameQuery() {
     return "SELECT count(*) FROM medications WHERE name = $1";
+  }
+
+  static String selectAllQuery() {
+    return "SELECT uuid as id, name, weight, code, image FROM medications";
   }
 }
