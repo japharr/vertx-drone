@@ -7,22 +7,21 @@ import java.util.Map;
 
 public interface Drone {
   // field-name
-  public static final String SERIAL_NUMBER = "serialNumber";
-  public static final String MODEL = "model";
-  public static final String WEIGHT_LIMIT = "weightLimit";
-  public static final String BATTERY_CAPACITY = "batteryCapacity";
-  public static final String STATE = "state";
+  String SERIAL_NUMBER = "serialNumber";
+  String MODEL = "model";
+  String WEIGHT_LIMIT = "weightLimit";
+  String BATTERY_CAPACITY = "batteryCapacity";
+  String STATE = "state";
 
   // validation
-  public static final int SERIAL_NUMBER_MAX = 100;
-  public static final List<String> ACCEPTABLE_MODELS =
-      List.of("Lightweight", "Middleweight", "Cruiserweight", "Heavyweight");
-  public static final double WEIGHT_LIMIT_MAX = 500.0;
+  int SERIAL_NUMBER_MAX = 100;
+  List<String> ACCEPTABLE_MODELS = List.of("Lightweight", "Middleweight", "Cruiserweight", "Heavyweight");
+  double WEIGHT_LIMIT_MAX = 500.0;
 
   // event-buss addresses
-  public static final String REGISTER_ADDRESS = "drone.register";
-  public static final String FETCH_ALL_ADDRESS = "drone.fetch-all";
-  public static final String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
+  String REGISTER_ADDRESS = "drone.register";
+  String FETCH_ALL_ADDRESS = "drone.fetch-all";
+  String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
 
   public enum StateType{
     IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING
@@ -40,6 +39,7 @@ public interface Drone {
         .put(BATTERY_CAPACITY, body.getDouble(BATTERY_CAPACITY))
         .put(STATE, StateType.IDLE);
   }
+
   static String insertDrone() {
     return "INSERT INTO drones VALUES($1, $2, $3, $4, $5, $6, current_timestamp, current_timestamp)";
   }
