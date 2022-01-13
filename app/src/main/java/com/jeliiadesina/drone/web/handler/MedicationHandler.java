@@ -25,15 +25,15 @@ public class MedicationHandler {
   }
 
   public void createMedication(RoutingContext ctx) {
-    JsonObject drone = Medication.object(jsonBody(ctx));
+    JsonObject medication = Medication.object(jsonBody(ctx));
 
-    eventBus.request(Medication.CREATE_ADDRESS, drone, res -> {
+    eventBus.request(Medication.CREATE_ADDRESS, medication, res -> {
       if(res.succeeded()) {
-        ctx.response().setStatusCode(200).end(drone.encodePrettily());
+        ctx.response().setStatusCode(200).end(medication.encodePrettily());
       } else {
         ReplyException cause = (ReplyException) res.cause();
         String failMessage = cause.getMessage();
-        ctx.response().setStatusCode(400).end(getMessage(getLanguageKey(ctx, i10nConf), failMessage));
+        ctx.response().setStatusCode(400).end(failMessage);
       }
     });
   }
