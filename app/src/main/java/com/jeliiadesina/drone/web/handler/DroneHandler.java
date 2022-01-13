@@ -25,14 +25,7 @@ public class DroneHandler {
   }
 
   public void registerDrone(RoutingContext ctx) {
-    JsonObject body = jsonBody(ctx);
-
-    JsonObject drone = new JsonObject()
-        .put(Drone.SERIAL_NUMBER, body.getString(Drone.SERIAL_NUMBER))
-        .put(Drone.MODEL, body.getString(Drone.MODEL))
-        .put(Drone.WEIGHT_LIMIT, body.getDouble(Drone.WEIGHT_LIMIT))
-        .put(Drone.BATTERY_CAPACITY, body.getDouble(Drone.BATTERY_CAPACITY))
-        .put(Drone.STATE, Drone.StateType.IDLE);
+    JsonObject drone = Drone.droneObject(jsonBody(ctx));
 
     eventBus.request(Drone.REGISTER_ADDRESS, drone, res -> {
       if(res.succeeded()) {

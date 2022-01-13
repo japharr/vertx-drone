@@ -1,5 +1,7 @@
 package com.jeliiadesina.drone.entity;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,15 @@ public interface Drone {
   // error codes
   static Map<Integer, String> ERROR_CODES = Map.of(101, "drone.serialNumber.exist");
 
+  // construct Drone object
+  static JsonObject droneObject(JsonObject body) {
+    return new JsonObject()
+        .put(SERIAL_NUMBER, body.getString(SERIAL_NUMBER))
+        .put(MODEL, body.getString(MODEL))
+        .put(WEIGHT_LIMIT, body.getDouble(WEIGHT_LIMIT))
+        .put(BATTERY_CAPACITY, body.getDouble(BATTERY_CAPACITY))
+        .put(STATE, StateType.IDLE);
+  }
   static String insertDrone() {
     return "INSERT INTO drones VALUES($1, $2, $3, $4, $5, $6, current_timestamp, current_timestamp)";
   }
