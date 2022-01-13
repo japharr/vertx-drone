@@ -1,10 +1,15 @@
 package com.jeliiadesina.drone.vertcle;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Medication;
 import com.jeliiadesina.drone.repository.DroneRepository;
 import com.jeliiadesina.drone.repository.DroneRepositoryImpl;
+import com.jeliiadesina.drone.repository.MedicationRepository;
+import com.jeliiadesina.drone.repository.MedicationRepositoryImpl;
 import com.jeliiadesina.drone.service.DroneService;
 import com.jeliiadesina.drone.service.DroneServiceImpl;
+import com.jeliiadesina.drone.service.MedicationService;
+import com.jeliiadesina.drone.service.MedicationServiceImpl;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -22,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class DatabaseVerticle extends AbstractVerticle {
   private static final Logger logger = LoggerFactory.getLogger(DatabaseVerticle.class);
   private DroneService droneService;
+  private MedicationService medicationService;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -44,6 +50,9 @@ public class DatabaseVerticle extends AbstractVerticle {
     vertx.eventBus().consumer(Drone.FETCH_ALL_ADDRESS).handler(droneService::fetchAllDrones);
     vertx.eventBus().consumer(Drone.FETCH_BY_STATE_ADDRESS).handler(droneService::fetchDronesByState);
 
+    vertx.eventBus().consumer(Medication.CREATE_ADDRESS).handler(medicationService::create);
+    vertx.eventBus().consumer(Medication.FETCH_ALL_ADDRESS).handler(medicationService::fetchAll);
+
     return Future.future(Promise::complete);
   }
 
@@ -53,6 +62,7 @@ public class DatabaseVerticle extends AbstractVerticle {
 
     SqlClient sqlClient = Pool.pool(vertx, connectOptions, poolOptions);
     droneService = new DroneServiceImpl(new DroneRepositoryImpl(sqlClient));
+    medicationService = new MedicationServiceImpl(new MedicationRepositoryImpl(sqlClient));
 
     return Future.future(Promise::complete);
   }
