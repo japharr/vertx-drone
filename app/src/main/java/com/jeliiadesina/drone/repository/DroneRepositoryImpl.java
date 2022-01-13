@@ -33,6 +33,15 @@ public class DroneRepositoryImpl implements DroneRepository{
   }
 
   @Override
+  public Future<JsonObject> findDroneBySerialNumber(String serialNumber) {
+    return sqlClient
+        .preparedQuery(selectOneBySerialNumber())
+        .execute(Tuple.of(serialNumber))
+        .map(rs -> rs.iterator().next())
+        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
+  }
+
+  @Override
   public Future<JsonArray> findAllDrones() {
     return sqlClient
         .preparedQuery(selectAllDrones())
@@ -74,19 +83,19 @@ public class DroneRepositoryImpl implements DroneRepository{
         .map(rs -> data);
   }
 
-  Future<JsonArray> mapToJsonArray(RowSet<Row> rows) {
-    JsonArray data = new JsonArray();
-    for (Row row : rows) {
-      data.add(new JsonObject()
-          .put("id", row.getValue("id"))
-          .put(SERIAL_NUMBER, row.getValue("serial_number"))
-          .put(MODEL, row.getValue("model"))
-          .put(WEIGHT_LIMIT, row.getValue("weight_limit"))
-          .put(BATTERY_CAPACITY, row.getValue("battery_capacity"))
-          .put(STATE, row.getValue("state"))
-      );
-    }
+  private JsonObject mapToJsonObject(Row row) {
+    return new JsonObject()
+        .put("id", row.getValue("id"))
+        .put(SERIAL_NUMBER, row.getValue("serial_number"))
+        .put(MODEL, row.getValue("model"))
+        .put(WEIGHT_LIMIT, row.getValue("weight_limit"))
+        .put(BATTERY_CAPACITY, row.getValue("battery_capacity"))
+        .put(STATE, row.getValue("state"));
+  }
 
+  private Future<JsonArray> mapToJsonArray(RowSet<Row> rows) {
+    JsonArray data = new JsonArray();
+    rows.forEach(row -> data.add(mapToJsonObject(row)));
     return Future.succeededFuture(data);
   }
 

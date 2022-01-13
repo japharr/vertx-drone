@@ -37,6 +37,11 @@ public interface Drone {
     return "SELECT count(*) FROM drones WHERE serial_number = $1";
   }
 
+  static String selectOneBySerialNumber() {
+    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
+        "WHERE serial_number = $1 LIMIT 1";
+  }
+
   static String selectAllDrones() {
     return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones";
   }

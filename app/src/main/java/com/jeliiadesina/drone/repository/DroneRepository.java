@@ -8,6 +8,8 @@ import io.vertx.core.json.JsonObject;
 public interface DroneRepository {
   Future<Integer> countDroneBySerialNumber(String serialNumber);
 
+  Future<JsonObject> findDroneBySerialNumber(String serialNumber);
+
   Future<JsonArray> findAllDrones();
 
   Future<JsonArray> findDronesByState(Drone.StateType state);
