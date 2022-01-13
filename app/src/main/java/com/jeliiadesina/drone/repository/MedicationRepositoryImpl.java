@@ -3,16 +3,17 @@ package com.jeliiadesina.drone.repository;
 import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.Medication;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.entity.Drone.countBySerialNumber;
-import static com.jeliiadesina.drone.entity.Drone.insertDrone;
-import static com.jeliiadesina.drone.entity.Medication.countByNameQuery;
-import static com.jeliiadesina.drone.entity.Medication.insertOneQuery;
+import static com.jeliiadesina.drone.entity.Drone.*;
+import static com.jeliiadesina.drone.entity.Medication.*;
 
 public class MedicationRepositoryImpl implements MedicationRepository {
   private final SqlClient sqlClient;
@@ -31,6 +32,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
           var count = item.getInteger(0);
           return Future.future(p -> p.complete(count != null? count : 0));
         });
+  }
+
+  @Override
+  public Future<JsonArray> findAll() {
+    return sqlClient
+        .preparedQuery(selectAllQuery())
+        .execute()
+        .flatMap(this::mapToJsonArray);
   }
 
   @Override
@@ -55,5 +64,20 @@ public class MedicationRepositoryImpl implements MedicationRepository {
         .preparedQuery(insertOneQuery())
         .execute(values)
         .map(rs -> data);
+  }
+
+  private JsonObject mapToJsonObject(Row row) {
+    return new JsonObject()
+        .put("id", row.getValue("id"))
+        .put(NAME, row.getValue("name"))
+        .put(WEIGHT, row.getValue("weight"))
+        .put(CODE, row.getValue("code"))
+        .put(IMAGE, row.getValue("image"));
+  }
+
+  private Future<JsonArray> mapToJsonArray(RowSet<Row> rows) {
+    JsonArray data = new JsonArray();
+    rows.forEach(row -> data.add(mapToJsonObject(row)));
+    return Future.succeededFuture(data);
   }
 }
