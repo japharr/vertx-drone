@@ -73,6 +73,18 @@ public class DroneHandler {
     });
   }
 
+  public void getBySerialNumber(RoutingContext ctx) {
+    String serialNumber = ctx.pathParam("serialNumber");
+    eventBus.request(Drone.FETCH_BY_SERIAL_NUMBER_ADDRESS, new JsonObject().put(Drone.SERIAL_NUMBER, serialNumber), res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200)
+            .end(((JsonArray)res.result().body()).encodePrettily());
+      } else {
+        ctx.fail(500);
+      }
+    });
+  }
+
   public void validateRegistration(RoutingContext ctx) {
     JsonObject body = jsonBody(ctx);
 

@@ -62,8 +62,8 @@ public class WebVerticle extends AbstractVerticle {
     var port = httpConf.getInteger("port", 8080);
 
     router.get(basePath + "/drones").handler(droneHandler::loadAllDrones);
-    router.get(basePath + "/drones?state=").handler(droneHandler::loadAllDrones);
-    router.get(basePath + "/drones/:id").handler(droneHandler::loadById);
+    router.get(basePath + "/drones?state=").handler(droneHandler::loadByState);
+    router.get(basePath + "/drones/:serialNumber").handler(droneHandler::getBySerialNumber);
     router.post(basePath + "/drones")
         .handler(registerDroneValidationHandler())
         .handler(droneHandler::validateRegistration)

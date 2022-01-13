@@ -24,6 +24,7 @@ public interface Drone {
   String FETCH_ALL_ADDRESS = "drone.fetch-all";
   String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
   String FETCH_BY_ID_ADDRESS = "drone.fetch-id";
+  String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-serial-number";
 
   public enum StateType{
     IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING

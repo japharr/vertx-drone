@@ -60,6 +60,24 @@ public class DroneServiceImpl implements DroneService {
   }
 
   @Override
+  public void fetchBySerialNumber(Message<Object> msg) {
+    if(!(msg.body() instanceof JsonObject data)) {
+      msg.fail(400, "json not formatted");
+      return;
+    }
+
+    String serialNumber = data.getString(Drone.SERIAL_NUMBER);
+    droneRepository.findDroneBySerialNumber(serialNumber)
+        .onComplete(rx -> {
+          if(rx.succeeded()) {
+            msg.reply(rx.result());
+          } else {
+            msg.fail(501, rx.cause().getMessage());
+          }
+        });
+  }
+
+  @Override
   public void fetchDronesByState(Message<Object> msg) {
     if(!(msg.body() instanceof JsonObject data)) {
       msg.fail(400, "json not formatted");
