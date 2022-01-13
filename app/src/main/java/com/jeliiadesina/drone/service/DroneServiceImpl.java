@@ -42,6 +42,24 @@ public class DroneServiceImpl implements DroneService {
   }
 
   @Override
+  public void fetchById(Message<Object> msg) {
+    if(!(msg.body() instanceof JsonObject data)) {
+      msg.fail(400, "json not formatted");
+      return;
+    }
+
+    String id = data.getString(Drone.ID);
+    droneRepository.findById(id)
+        .onComplete(rx -> {
+          if(rx.succeeded()) {
+            msg.reply(rx.result());
+          } else {
+            msg.fail(501, rx.cause().getMessage());
+          }
+        });
+  }
+
+  @Override
   public void fetchDronesByState(Message<Object> msg) {
     if(!(msg.body() instanceof JsonObject data)) {
       msg.fail(400, "json not formatted");

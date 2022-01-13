@@ -7,6 +7,7 @@ import java.util.Map;
 
 public interface Drone {
   // field-name
+  String ID = "id";
   String SERIAL_NUMBER = "serialNumber";
   String MODEL = "model";
   String WEIGHT_LIMIT = "weightLimit";
@@ -22,6 +23,7 @@ public interface Drone {
   String REGISTER_ADDRESS = "drone.register";
   String FETCH_ALL_ADDRESS = "drone.fetch-all";
   String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
+  String FETCH_BY_ID_ADDRESS = "drone.fetch-id";
 
   public enum StateType{
     IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING
@@ -51,6 +53,10 @@ public interface Drone {
   static String selectOneBySerialNumber() {
     return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
         "WHERE serial_number = $1 LIMIT 1";
+  }
+  static String selectOneById() {
+    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
+        "WHERE id = $1 LIMIT 1";
   }
 
   static String selectAllDrones() {

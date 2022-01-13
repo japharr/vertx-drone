@@ -7,5 +7,7 @@ public interface DroneService {
 
   void fetchAllDrones(Message<Object> msg);
 
+  void fetchById(Message<Object> msg);
+
   void fetchDronesByState(Message<Object> msg);
 }

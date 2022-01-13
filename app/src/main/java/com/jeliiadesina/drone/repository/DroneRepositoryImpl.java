@@ -42,6 +42,15 @@ public class DroneRepositoryImpl implements DroneRepository{
   }
 
   @Override
+  public Future<JsonObject> findById(String id) {
+    return sqlClient
+        .preparedQuery(selectOneById())
+        .execute(Tuple.of(id))
+        .map(rs -> rs.iterator().next())
+        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
+  }
+
+  @Override
   public Future<JsonArray> findAllDrones() {
     return sqlClient
         .preparedQuery(selectAllDrones())
