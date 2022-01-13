@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.vertcle;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Medication;
 import com.jeliiadesina.drone.web.handler.DroneHandler;
 import com.jeliiadesina.drone.web.handler.MedicationHandler;
 import io.vertx.core.AbstractVerticle;
@@ -70,7 +71,10 @@ public class WebVerticle extends AbstractVerticle {
         .handler(droneHandler::registerDrone);
 
     router.get(basePath + "/medications").handler(medicationHandler::fetchAllMedications);
-    router.post(basePath + "/medications").handler(medicationHandler::createMedication);
+    router.post(basePath + "/medications")
+        .handler(createMedicationValidationHandler())
+        .handler(medicationHandler::validateAndVerify)
+        .handler(medicationHandler::createMedication);
 
     router.errorHandler(400, ctx -> {
       if (ctx.failure() instanceof BadRequestException) {
@@ -89,6 +93,18 @@ public class WebVerticle extends AbstractVerticle {
         .property(Drone.MODEL, stringSchema())
         .property(Drone.WEIGHT_LIMIT, numberSchema())
         .property(Drone.BATTERY_CAPACITY, numberSchema());
+
+    return ValidationHandler
+        .builder(schemaParser)
+        .body(Bodies.json(bodySchemaBuilder))
+        .body(Bodies.formUrlEncoded(bodySchemaBuilder)).build();
+  }
+
+  private ValidationHandler createMedicationValidationHandler() {
+    ObjectSchemaBuilder bodySchemaBuilder = objectSchema()
+        .property(Medication.NAME, stringSchema())
+        .property(Medication.CODE, stringSchema())
+        .property(Medication.WEIGHT, numberSchema());
 
     return ValidationHandler
         .builder(schemaParser)

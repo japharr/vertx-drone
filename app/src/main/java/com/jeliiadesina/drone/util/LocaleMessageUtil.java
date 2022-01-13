@@ -1,24 +1,22 @@
 package com.jeliiadesina.drone.util;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.LanguageHeader;
-import io.vertx.ext.web.RoutingContext;
-
 import java.text.MessageFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public abstract class LocaleMessageUtil {
-  public static final Set<String> SUPPORTED_I18N = Set.of("en", "fr");
-
   public static String getMessage(String lang, String key) {
     Locale locale = Locale.forLanguageTag(lang);
 
     if(locale == null) locale = Locale.ENGLISH;
 
-    ResourceBundle labels = ResourceBundle.getBundle("messages", locale);
+    String message = key;
+    try {
+      ResourceBundle labels = ResourceBundle.getBundle("messages", locale);
+      message = labels.getString(key);
+    } catch (Exception ignored) {}
 
-    return labels.getString(key);
+    return message;
   }
 
   public static String getMessage(String lang, String key, Object... input) {
