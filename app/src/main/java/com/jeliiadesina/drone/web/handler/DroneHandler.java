@@ -66,7 +66,7 @@ public class DroneHandler {
     eventBus.request(Drone.FETCH_BY_ID_ADDRESS, new JsonObject().put("id", id), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
-            .end(((JsonArray)res.result().body()).encodePrettily());
+            .end(((JsonObject)res.result().body()).encodePrettily());
       } else {
         ctx.fail(500);
       }
@@ -78,7 +78,7 @@ public class DroneHandler {
     eventBus.request(Drone.FETCH_BY_SERIAL_NUMBER_ADDRESS, new JsonObject().put(Drone.SERIAL_NUMBER, serialNumber), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
-            .end(((JsonArray)res.result().body()).encodePrettily());
+            .end(((JsonObject)res.result().body()).encodePrettily());
       } else {
         ctx.fail(500);
       }
