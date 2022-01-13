@@ -1,6 +1,5 @@
 package com.jeliiadesina.drone.repository;
 
-import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.Medication;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +11,6 @@ import io.vertx.sqlclient.Tuple;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.entity.Drone.*;
 import static com.jeliiadesina.drone.entity.Medication.*;
 
 public class MedicationRepositoryImpl implements MedicationRepository {
@@ -32,6 +30,15 @@ public class MedicationRepositoryImpl implements MedicationRepository {
           var count = item.getInteger(0);
           return Future.future(p -> p.complete(count != null? count : 0));
         });
+  }
+
+  @Override
+  public Future<JsonObject> findByName(String name) {
+    return sqlClient
+        .preparedQuery(selectOneByName())
+        .execute(Tuple.of(name))
+        .map(rs -> rs.iterator().next())
+        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
   }
 
   @Override
@@ -62,6 +69,28 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     return sqlClient
         .preparedQuery(insertOneQuery())
+        .execute(values)
+        .map(rs -> data);
+  }
+
+  @Override
+  public Future<JsonObject> updateImage(JsonObject data) {
+    String name = data.getString(Medication.NAME);
+    return countByName(name)
+        .compose(count -> updateImage(count, data));
+  }
+
+  private Future<JsonObject> updateImage(int count, JsonObject data) {
+    if(count == 0) {
+      return Future.failedFuture("medication.name.notFound");
+    }
+
+    Tuple values = Tuple.of(
+        data.getString(Medication.NAME),
+        data.getString("image"));
+
+    return sqlClient
+        .preparedQuery(updateWithImage())
         .execute(values)
         .map(rs -> data);
   }

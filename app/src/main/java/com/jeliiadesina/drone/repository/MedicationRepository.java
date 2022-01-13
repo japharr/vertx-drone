@@ -7,7 +7,11 @@ import io.vertx.core.json.JsonObject;
 public interface MedicationRepository {
   Future<Integer> countByName(String name);
 
+  Future<JsonObject> findByName(String name);
+
   Future<JsonArray> findAll();
 
   Future<JsonObject> persistMedication(JsonObject data);
+
+  Future<JsonObject> updateImage(JsonObject data);
 }

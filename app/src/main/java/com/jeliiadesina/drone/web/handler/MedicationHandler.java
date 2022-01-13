@@ -6,8 +6,12 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.jeliiadesina.drone.util.ErrorUtil.errorField;
@@ -16,6 +20,8 @@ import static com.jeliiadesina.drone.util.RoutingContextUtil.getLanguageKey;
 import static com.jeliiadesina.drone.util.RoutingContextUtil.jsonBody;
 
 public class MedicationHandler {
+  private final static Logger logger = LoggerFactory.getLogger(MedicationHandler.class);
+
   private final Pattern validName = Pattern.compile("^[A-Za-z0-9_-]*$");
   private final Pattern validCode = Pattern.compile("^[A-Z0-9_]*$");
 
@@ -53,6 +59,43 @@ public class MedicationHandler {
         ctx.fail(500);
       }
     });
+  }
+
+  public void getByName(RoutingContext ctx) {
+    String name = ctx.pathParam("name");
+    eventBus.request(Medication.FETCH_BY_NAME_ADDRESS, new JsonObject().put(Medication.NAME, name), res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200)
+            .end(((JsonObject)res.result().body()).encodePrettily());
+      } else {
+        ctx.fail(500);
+      }
+    });
+  }
+
+  public void imageUpload(RoutingContext ctx) {
+    String name = ctx.pathParam(Medication.NAME);
+    Optional<FileUpload> opt = ctx.fileUploads().stream().findFirst();
+    if(opt.isPresent() && opt.get().contentType().contains("image")) {
+      FileUpload fileUpload = opt.get();
+      eventBus.request(Medication.UPLOAD_IMAGE_ADDRESS,
+          new JsonObject()
+              .put("name", name)
+              .put("image", fileUpload.uploadedFileName())
+              .put("fileName", fileUpload.fileName())
+              .put("fileUploadName", fileUpload.name())
+              .put("contentType", fileUpload.contentType()),
+          res -> {
+            if(res.succeeded()) {
+              ctx.response().setStatusCode(200).end();
+            } else {
+              ctx.response().setStatusCode(500).end(res.cause().getMessage());
+            }
+          }
+      );
+    } else {
+     ctx.response().setStatusCode(400).end("Please, upload an image");
+    }
   }
 
   public void validateAndVerify(RoutingContext ctx) {

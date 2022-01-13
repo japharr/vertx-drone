@@ -53,7 +53,9 @@ public class DatabaseVerticle extends AbstractVerticle {
     vertx.eventBus().consumer(Drone.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(droneService::fetchBySerialNumber);
 
     vertx.eventBus().consumer(Medication.CREATE_ADDRESS).handler(medicationService::create);
+    vertx.eventBus().consumer(Medication.UPLOAD_IMAGE_ADDRESS).handler(medicationService::updateImage);
     vertx.eventBus().consumer(Medication.FETCH_ALL_ADDRESS).handler(medicationService::fetchAll);
+    vertx.eventBus().consumer(Medication.FETCH_BY_NAME_ADDRESS).handler(medicationService::fetchByName);
 
     return Future.future(Promise::complete);
   }

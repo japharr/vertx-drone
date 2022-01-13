@@ -8,6 +8,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -70,7 +71,12 @@ public class WebVerticle extends AbstractVerticle {
         .handler(droneHandler::validateRegistration)
         .handler(droneHandler::registerDrone);
 
+    router.post(basePath + "/medications/:name/image")
+        .handler(BodyHandler.create());
+
     router.get(basePath + "/medications").handler(medicationHandler::fetchAllMedications);
+    router.get(basePath + "/medications/:name").handler(medicationHandler::getByName);
+    router.post(basePath + "/medications/:name/image").handler(medicationHandler::imageUpload);
     router.post(basePath + "/medications")
         .handler(createMedicationValidationHandler())
         .handler(medicationHandler::validateAndVerify)

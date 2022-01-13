@@ -12,7 +12,8 @@ public interface Medication {
   // event-buss addresses
   String CREATE_ADDRESS = "medication.create";
   String FETCH_ALL_ADDRESS = "medication.fetch-all";
-  String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
+  String UPLOAD_IMAGE_ADDRESS = "medication.upload-image";
+  String FETCH_BY_NAME_ADDRESS = "drone.fetch-name";
 
 
   // construct Drone object
@@ -31,6 +32,16 @@ public interface Medication {
 
   static String countByNameQuery() {
     return "SELECT count(*) FROM medications WHERE name = $1";
+  }
+
+  static String selectOneByName() {
+    return "SELECT uuid as id, name, weight, code, image FROM medications " +
+        "WHERE name = $1 LIMIT 1";
+  }
+
+  static String updateWithImage() {
+    return "UPDATE medications SET image = $2, last_modified_date = current_timestamp " +
+        "WHERE name = $1 RETURNING *";
   }
 
   static String selectAllQuery() {
