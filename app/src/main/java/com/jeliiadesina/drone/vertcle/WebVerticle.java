@@ -124,7 +124,11 @@ public class WebVerticle extends AbstractVerticle {
         .put(Drone.STATE, Drone.StateType.IDLE);
 
     eventBus.request(Drone.REGISTER_ADDRESS, drone, res -> {
-      
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200).end(drone.encodePrettily());
+      } else {
+        ctx.response().setStatusCode(400).end(res.cause().getLocalizedMessage());
+      }
     });
   }
 
