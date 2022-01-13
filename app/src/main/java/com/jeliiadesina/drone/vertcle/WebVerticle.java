@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.vertcle;
 
 import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.web.handler.DroneHandler;
+import com.jeliiadesina.drone.web.handler.MedicationHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -25,6 +26,7 @@ public class WebVerticle extends AbstractVerticle {
   private final JsonObject i10nConf = new JsonObject();
   private SchemaParser schemaParser;
   private DroneHandler droneHandler;
+  private MedicationHandler medicationHandler;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -32,6 +34,7 @@ public class WebVerticle extends AbstractVerticle {
     i10nConf.mergeIn(config().getJsonObject("i18n"));
 
     droneHandler = new DroneHandler(vertx.eventBus(), config());
+    medicationHandler = new MedicationHandler(vertx.eventBus(), config());
 
     startWebApp()
         .onComplete(http ->
@@ -64,6 +67,8 @@ public class WebVerticle extends AbstractVerticle {
         .handler(registerDroneValidationHandler())
         .handler(droneHandler::validateRegistration)
         .handler(droneHandler::registerDrone);
+
+    router.get(basePath + "/medications").handler(medicationHandler::fetchAllMedications);
 
     router.errorHandler(400, ctx -> {
       if (ctx.failure() instanceof BadRequestException) {
