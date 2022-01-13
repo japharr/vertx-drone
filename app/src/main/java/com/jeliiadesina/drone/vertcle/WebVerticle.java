@@ -6,6 +6,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,6 +14,8 @@ import io.vertx.ext.web.LanguageHeader;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.sstore.LocalSessionStore;
+import io.vertx.ext.web.sstore.SessionStore;
 import io.vertx.ext.web.validation.*;
 import io.vertx.ext.web.validation.builder.Bodies;
 import io.vertx.json.schema.SchemaParser;
@@ -21,20 +24,23 @@ import io.vertx.json.schema.SchemaRouterOptions;
 import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.jeliiadesina.drone.util.LocaleMessageUtil.getMessage;
 import static io.vertx.json.schema.common.dsl.Schemas.*;
 
 public class WebVerticle extends AbstractVerticle {
   private final JsonObject httpConf = new JsonObject();
+  private final JsonObject i10nConf = new JsonObject();
   private SchemaParser schemaParser;
   private EventBus eventBus;
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     httpConf.mergeIn(config().getJsonObject("http"));
+    i10nConf.mergeIn(config().getJsonObject("i18n"));
+
     eventBus = vertx.eventBus();
 
     startWebApp()
@@ -127,7 +133,9 @@ public class WebVerticle extends AbstractVerticle {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200).end(drone.encodePrettily());
       } else {
-        ctx.response().setStatusCode(400).end(res.cause().getLocalizedMessage());
+        ReplyException cause = (ReplyException) res.cause();
+        String failMessage = cause.getMessage();
+        ctx.response().setStatusCode(400).end(getMessage(getLanguageKey(ctx), failMessage));
       }
     });
   }
@@ -140,13 +148,13 @@ public class WebVerticle extends AbstractVerticle {
     JsonArray jsonArray = new JsonArray();
 
     if(!body.containsKey(Drone.SERIAL_NUMBER))
-      jsonArray.add(errorField(Drone.SERIAL_NUMBER, getMessage(ctx, "serialNumber.required")));
+      jsonArray.add(errorField(Drone.SERIAL_NUMBER, getMessage(getLanguageKey(ctx), "serialNumber.required")));
     if(!body.containsKey(Drone.MODEL))
-      jsonArray.add(errorField(Drone.MODEL, getMessage(ctx, "model.required")));
+      jsonArray.add(errorField(Drone.MODEL, getMessage(getLanguageKey(ctx), "model.required")));
     if(!body.containsKey(Drone.WEIGHT_LIMIT))
-      jsonArray.add(errorField(Drone.WEIGHT_LIMIT, getMessage(ctx, "weightLimit.required")));
+      jsonArray.add(errorField(Drone.WEIGHT_LIMIT, getMessage(getLanguageKey(ctx), "weightLimit.required")));
     if(!body.containsKey(Drone.BATTERY_CAPACITY))
-      jsonArray.add(errorField(Drone.BATTERY_CAPACITY, getMessage(ctx, "batteryCapacity.required")));
+      jsonArray.add(errorField(Drone.BATTERY_CAPACITY, getMessage(getLanguageKey(ctx), "batteryCapacity.required")));
 
     return jsonArray;
   }
@@ -156,17 +164,17 @@ public class WebVerticle extends AbstractVerticle {
 
     String serialNumber = body.getString(Drone.SERIAL_NUMBER);
     if(serialNumber.length() > Drone.SERIAL_NUMBER_MAX) {
-      jsonArray.add(errorField(Drone.SERIAL_NUMBER, getMessage(ctx, "serialNumber.max", Drone.SERIAL_NUMBER_MAX)));
+      jsonArray.add(errorField(Drone.SERIAL_NUMBER, getMessage(getLanguageKey(ctx), "serialNumber.max", Drone.SERIAL_NUMBER_MAX)));
     }
 
     String model = body.getString(Drone.MODEL);
     if(!Drone.ACCEPTABLE_MODELS.contains(model)) {
-      jsonArray.add(errorField(Drone.MODEL, getMessage(ctx, "model.acceptable", String.join(", ", Drone.ACCEPTABLE_MODELS))));
+      jsonArray.add(errorField(Drone.MODEL, getMessage(getLanguageKey(ctx), "model.acceptable", String.join(", ", Drone.ACCEPTABLE_MODELS))));
     }
 
     double weightLimit = body.getDouble(Drone.WEIGHT_LIMIT, 0.0);
     if(weightLimit > Drone.WEIGHT_LIMIT_MAX) {
-      jsonArray.add(errorField(Drone.WEIGHT_LIMIT, getMessage(ctx, "weightLimit.max", Drone.WEIGHT_LIMIT_MAX)));
+      jsonArray.add(errorField(Drone.WEIGHT_LIMIT, getMessage(getLanguageKey(ctx), "weightLimit.max", Drone.WEIGHT_LIMIT_MAX)));
     }
 
     return jsonArray;
@@ -184,21 +192,11 @@ public class WebVerticle extends AbstractVerticle {
     }
   }
 
-  private String getMessage(RoutingContext ctx, String key) {
-    Optional<LanguageHeader> languageHeader = ctx.acceptableLanguages().stream().findFirst();
+  private String getLanguageKey(RoutingContext ctx) {
+    Optional<String> tag = ctx.acceptableLanguages().stream().map(LanguageHeader::tag).findFirst();
+    Set<String> supportedLanguages = i10nConf.getJsonArray("tags")
+        .stream().map(Object::toString).collect(Collectors.toSet());
 
-    String language = languageHeader.isPresent()? languageHeader.get().tag() : "en";
-
-    Locale locale = Locale.forLanguageTag(language);
-
-    if(locale == null) locale = Locale.ENGLISH;
-
-    ResourceBundle labels = ResourceBundle.getBundle("messages", locale);
-
-    return labels.getString(key);
-  }
-
-  private String getMessage(RoutingContext ctx, String key, Object... input) {
-    return MessageFormat.format(getMessage(ctx, key), input);
+    return tag.filter(supportedLanguages::contains).orElse("en");
   }
 }
