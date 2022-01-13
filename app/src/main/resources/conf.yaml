@@ -8,3 +8,8 @@ db:
   database: drones_db
   user: devuser
   password: pass123
+
+i18n:
+  tags:
+    - en
+    - fr
