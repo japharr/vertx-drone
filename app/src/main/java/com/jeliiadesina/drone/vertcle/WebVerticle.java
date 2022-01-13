@@ -69,6 +69,7 @@ public class WebVerticle extends AbstractVerticle {
         .handler(droneHandler::registerDrone);
 
     router.get(basePath + "/medications").handler(medicationHandler::fetchAllMedications);
+    router.post(basePath + "/medications").handler(medicationHandler::createMedication);
 
     router.errorHandler(400, ctx -> {
       if (ctx.failure() instanceof BadRequestException) {
