@@ -39,6 +39,12 @@ public class DroneHandler {
   }
 
   public void loadAllDrones(RoutingContext ctx) {
+    String state = ctx.queryParams().get("state");
+    if(state != null) {
+      loadByState(ctx);
+      return;
+    }
+
     eventBus.request(Drone.FETCH_ALL_ADDRESS, new JsonObject(), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
