@@ -17,6 +17,7 @@ name VARCHAR(100) NOT NULL,
 code VARCHAR(100) NOT NULL,
 weight DECIMAL NOT NULL,
 image VARCHAR(100),
+drone_uuid VARCHAR(500) NOT NULL,
 created_date TIMESTAMP,
 last_modified_date TIMESTAMP
 );
