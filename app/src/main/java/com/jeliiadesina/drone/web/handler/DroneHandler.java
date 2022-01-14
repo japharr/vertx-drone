@@ -86,7 +86,9 @@ public class DroneHandler {
         ctx.response().setStatusCode(200)
             .end(((JsonObject)res.result().body()).encodePrettily());
       } else {
-        ctx.fail(500);
+        ReplyException cause = (ReplyException) res.cause();
+        ctx.response().setStatusCode(cause.failureCode())
+            .end(getMessage(getLanguageKey(ctx, i10nConf), cause.getMessage(), serialNumber));
       }
     });
   }

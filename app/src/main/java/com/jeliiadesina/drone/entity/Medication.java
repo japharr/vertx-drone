@@ -42,7 +42,7 @@ public interface Medication {
 
   static String selectAllByDroneId() {
     return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications " +
-        "WHERE drone_id = $1";
+        "WHERE drone_uuid = $1";
   }
 
   static String updateWithImage() {

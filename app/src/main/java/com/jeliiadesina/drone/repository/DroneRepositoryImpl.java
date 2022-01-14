@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.repository;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,8 +38,15 @@ public class DroneRepositoryImpl implements DroneRepository{
     return sqlClient
         .preparedQuery(selectOneBySerialNumber())
         .execute(Tuple.of(serialNumber))
-        .map(rs -> rs.iterator().next())
-        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
+        .compose(this::mapToFirstResult);
+  }
+
+  Future<JsonObject> mapToFirstResult(RowSet<Row> rs) {
+    if (rs.size() >= 1) {
+     return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
+    } else {
+      return Future.<JsonObject>failedFuture(new NotFoundException("drone.serialNumber.not-found"));
+    }
   }
 
   @Override
@@ -46,8 +54,7 @@ public class DroneRepositoryImpl implements DroneRepository{
     return sqlClient
         .preparedQuery(selectOneById())
         .execute(Tuple.of(id))
-        .map(rs -> rs.iterator().next())
-        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
+        .compose(this::mapToFirstResult);
   }
 
   @Override

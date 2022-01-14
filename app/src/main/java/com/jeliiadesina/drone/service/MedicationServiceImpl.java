@@ -78,11 +78,17 @@ public class MedicationServiceImpl implements MedicationService {
 
     String serialNumber = data.getString(Drone.SERIAL_NUMBER);
     droneRepository.findDroneBySerialNumber(serialNumber)
-        .compose(json -> droneRepository.findById(json.getString(Drone.ID)))
+        .onComplete(rx -> {
+            if(rx.failed()) {
+                System.out.println("error occurred: " + rx.cause().getMessage());
+            }
+        })
+        .compose(json -> repository.findByDroneId(json.getString(Drone.ID)))
         .onComplete(rx -> {
             if(rx.succeeded()) {
                 msg.reply(rx.result());
             } else {
+                System.out.println("error occurred: " + rx.cause().getMessage());
                 msg.fail(501, rx.cause().getMessage());
             }
         });
