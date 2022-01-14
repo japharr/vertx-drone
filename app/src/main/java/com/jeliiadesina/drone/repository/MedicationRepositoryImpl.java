@@ -42,6 +42,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
   }
 
   @Override
+  public Future<JsonArray> findByDroneId(String droneId) {
+    return sqlClient
+        .preparedQuery(selectAllByDroneId())
+        .execute(Tuple.of(droneId))
+        .flatMap(this::mapToJsonArray);
+  }
+
+  @Override
   public Future<JsonArray> findAll() {
     return sqlClient
         .preparedQuery(selectAllQuery())

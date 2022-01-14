@@ -65,6 +65,7 @@ public class WebVerticle extends AbstractVerticle {
 
     router.get(basePath + "/drones").handler(droneHandler::loadAllDrones);
     router.get(basePath + "/drones/:serialNumber").handler(droneHandler::getBySerialNumber);
+    router.get(basePath + "/drones/:serialNumber/medications").handler(medicationHandler::getBySerialNumber);
     router.post(basePath + "/drones")
         .handler(registerDroneValidationHandler())
         .handler(droneHandler::validateRegistration)

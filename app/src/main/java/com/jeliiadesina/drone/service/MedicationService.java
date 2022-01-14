@@ -9,5 +9,7 @@ public interface MedicationService {
 
   void fetchByName(Message<Object> msg);
 
+  void fetchByDrone(Message<Object> msg);
+
   void fetchAll(Message<Object> msg);
 }

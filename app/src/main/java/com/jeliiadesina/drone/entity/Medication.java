@@ -14,6 +14,7 @@ public interface Medication {
   String FETCH_ALL_ADDRESS = "medication.fetch-all";
   String UPLOAD_IMAGE_ADDRESS = "medication.upload-image";
   String FETCH_BY_NAME_ADDRESS = "drone.fetch-name";
+  String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-drone-serialnumber";
 
 
   // construct Drone object
@@ -37,6 +38,11 @@ public interface Medication {
   static String selectOneByName() {
     return "SELECT uuid as id, name, weight, code, image FROM medications " +
         "WHERE name = $1 LIMIT 1";
+  }
+
+  static String selectAllByDroneId() {
+    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications " +
+        "WHERE drone_id = $1";
   }
 
   static String updateWithImage() {

@@ -56,6 +56,7 @@ public class DatabaseVerticle extends AbstractVerticle {
     vertx.eventBus().consumer(Medication.UPLOAD_IMAGE_ADDRESS).handler(medicationService::updateImage);
     vertx.eventBus().consumer(Medication.FETCH_ALL_ADDRESS).handler(medicationService::fetchAll);
     vertx.eventBus().consumer(Medication.FETCH_BY_NAME_ADDRESS).handler(medicationService::fetchByName);
+    vertx.eventBus().consumer(Medication.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(medicationService::fetchByDrone);
 
     return Future.future(Promise::complete);
   }
@@ -65,8 +66,9 @@ public class DatabaseVerticle extends AbstractVerticle {
     var connectOptions = connectOptions();
 
     SqlClient sqlClient = Pool.pool(vertx, connectOptions, poolOptions);
-    droneService = new DroneServiceImpl(new DroneRepositoryImpl(sqlClient));
-    medicationService = new MedicationServiceImpl(new MedicationRepositoryImpl(sqlClient));
+    DroneRepository droneRepository = new DroneRepositoryImpl(sqlClient);
+    droneService = new DroneServiceImpl(droneRepository);
+    medicationService = new MedicationServiceImpl(new MedicationRepositoryImpl(sqlClient), droneRepository);
 
     return Future.future(Promise::complete);
   }

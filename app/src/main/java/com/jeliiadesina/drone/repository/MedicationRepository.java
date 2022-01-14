@@ -9,6 +9,8 @@ public interface MedicationRepository {
 
   Future<JsonObject> findByName(String name);
 
+  Future<JsonArray> findByDroneId(String droneId);
+
   Future<JsonArray> findAll();
 
   Future<JsonObject> persistMedication(JsonObject data);
