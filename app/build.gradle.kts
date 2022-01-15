@@ -9,6 +9,7 @@ dependencies {
     val restAssuredVersion = project.extra["restAssuredVersion"]
     val assertjVersion = project.extra["assertjVersion"]
     val testContainersVersion = project.extra["testContainersVersion"]
+    val nettyResolverVersion = project.extra["nettyResolverVersion"]
 
     implementation("io.vertx:vertx-web:$vertxVersion")
     implementation("io.vertx:vertx-config:$vertxVersion")
@@ -26,6 +27,8 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+
+    runtimeOnly("io.netty:netty-resolver-dns-native-macos:$nettyResolverVersion:osx-x86_64")
 }
 
 application {

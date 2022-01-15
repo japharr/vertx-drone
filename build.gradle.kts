@@ -13,6 +13,7 @@ allprojects {
     extra["assertjVersion"] = "3.21.0"
     extra["restAssuredVersion"] = "4.4.0"
     extra["testContainersVersion"] = "1.15.2"
+    extra["nettyResolverVersion"] = "4.1.72.Final"
 }
 
 subprojects {
