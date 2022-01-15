@@ -147,6 +147,11 @@ public class DroneHandler {
       jsonArray.add(errorField(Drone.WEIGHT_LIMIT, getMessage(getLanguageKey(ctx, i10nConf), "weightLimit.max", Drone.WEIGHT_LIMIT_MAX)));
     }
 
+    double batteryCapacity = body.getDouble(Drone.BATTERY_CAPACITY, 0.0);
+    if(batteryCapacity > 100) {
+      jsonArray.add(errorField(Drone.BATTERY_CAPACITY, getMessage(getLanguageKey(ctx, i10nConf), "batteryCapacity.max", Drone.BATTERY_CAPACITY_MAX)));
+    }
+
     return jsonArray;
   }
 }

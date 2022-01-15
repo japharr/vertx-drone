@@ -18,6 +18,7 @@ public interface Drone {
   int SERIAL_NUMBER_MAX = 100;
   List<String> ACCEPTABLE_MODELS = List.of("Lightweight", "Middleweight", "Cruiserweight", "Heavyweight");
   double WEIGHT_LIMIT_MAX = 500.0;
+  double BATTERY_CAPACITY_MAX = 100.0;
 
   // event-buss addresses
   String REGISTER_ADDRESS = "drone.register";
