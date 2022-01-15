@@ -11,9 +11,13 @@ public interface MedicationRepository {
 
   Future<JsonArray> findByDroneId(String droneId);
 
+  Future<Double> totalDroneWeigh(String droneId);
+
   Future<JsonArray> findAll();
 
   Future<JsonObject> persistMedication(JsonObject data);
 
   Future<JsonObject> updateImage(JsonObject data);
+
+  Future<JsonObject> updateDroneId(JsonObject data);
 }

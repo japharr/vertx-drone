@@ -17,4 +17,6 @@ public interface DroneRepository {
   Future<JsonArray> findDronesByState(Drone.StateType state);
 
   Future<JsonObject> persistDrone(JsonObject data);
+
+  Future<Drone.StateType> updateState(String droneId, Drone.StateType state);
 }

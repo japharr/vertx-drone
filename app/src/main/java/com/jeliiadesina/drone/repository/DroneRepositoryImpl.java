@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.repository;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Medication;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
@@ -14,6 +15,8 @@ import io.vertx.sqlclient.Tuple;
 import java.util.UUID;
 
 import static com.jeliiadesina.drone.entity.Drone.*;
+import static com.jeliiadesina.drone.entity.Medication.updateWithDroneId;
+import static com.jeliiadesina.drone.entity.Medication.updateWithImage;
 
 public class DroneRepositoryImpl implements DroneRepository{
   private final SqlClient sqlClient;
@@ -27,6 +30,18 @@ public class DroneRepositoryImpl implements DroneRepository{
     return sqlClient
         .preparedQuery(countBySerialNumber())
         .execute(Tuple.of(serialNumber))
+        .map(rs -> rs.iterator().next())
+        .flatMap(item -> {
+          var count = item.getInteger(0);
+          return Future.future(p -> p.complete(count != null? count : 0));
+        });
+  }
+
+
+  private Future<Integer> countDroneById(String id) {
+    return sqlClient
+        .preparedQuery(countById())
+        .execute(Tuple.of(id))
         .map(rs -> rs.iterator().next())
         .flatMap(item -> {
           var count = item.getInteger(0);
@@ -79,6 +94,24 @@ public class DroneRepositoryImpl implements DroneRepository{
     String serialNumber = data.getString(Drone.SERIAL_NUMBER);
     return countDroneBySerialNumber(serialNumber)
         .compose(count -> persistDrone(count, data));
+  }
+
+  @Override
+  public Future<StateType> updateState(String droneId, StateType state) {
+    return countDroneById(droneId).compose(count -> updateState(count, droneId, state));
+  }
+
+  private Future<StateType> updateState(int count, String droneId, StateType state) {
+    if(count == 0) {
+      return Future.failedFuture(new NotFoundException(404, "drone.not-found"));
+    }
+
+    Tuple values = Tuple.of(droneId, state);
+
+    return sqlClient
+        .preparedQuery(updateWithState())
+        .execute(values)
+        .map(rs -> state);
   }
 
   private Future<JsonObject> persistDrone(int count, JsonObject data) {

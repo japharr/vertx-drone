@@ -12,4 +12,6 @@ public interface MedicationService {
   void fetchByDrone(Message<Object> msg);
 
   void fetchAll(Message<Object> msg);
+
+  void addMedicationToDrone(Message<Object> msg);
 }

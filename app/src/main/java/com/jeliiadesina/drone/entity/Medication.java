@@ -8,6 +8,7 @@ public interface Medication {
   String WEIGHT = "weight";
   String CODE = "code";
   String IMAGE = "image";
+  String DRONE_ID = "droneId";
 
   // event-buss addresses
   String CREATE_ADDRESS = "medication.create";
@@ -15,6 +16,7 @@ public interface Medication {
   String UPLOAD_IMAGE_ADDRESS = "medication.upload-image";
   String FETCH_BY_NAME_ADDRESS = "drone.fetch-name";
   String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-drone-serialnumber";
+  String ADD_MEDICATION_TO_DRONE_ADDRESS = "medication.add.to-drone";
 
 
   // construct Drone object
@@ -24,6 +26,11 @@ public interface Medication {
         .put(WEIGHT, body.getDouble(WEIGHT))
         .put(CODE, body.getString(CODE))
         .put(IMAGE, body.getString(IMAGE));
+  }
+
+  static JsonObject objectMedicationName(JsonObject body) {
+    return new JsonObject()
+        .put(NAME, body.getString(NAME));
   }
 
   // sql queries
@@ -36,7 +43,7 @@ public interface Medication {
   }
 
   static String selectOneByName() {
-    return "SELECT uuid as id, name, weight, code, image FROM medications " +
+    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications " +
         "WHERE name = $1 LIMIT 1";
   }
 
@@ -48,6 +55,16 @@ public interface Medication {
   static String updateWithImage() {
     return "UPDATE medications SET image = $2, last_modified_date = current_timestamp " +
         "WHERE name = $1 RETURNING *";
+  }
+
+  static String updateWithDroneId() {
+    return "UPDATE medications SET drone_uuid = $2, last_modified_date = current_timestamp " +
+        "WHERE name = $1 RETURNING *";
+  }
+
+  static String selectTotalMedicationWeigh() {
+    return "SELECT drone_uuid as drone_id, SUM(weight) as total_weight FROM medications " +
+        "WHERE (drone_uuid = $1) GROUP BY drone_uuid";
   }
 
   static String selectAllQuery() {

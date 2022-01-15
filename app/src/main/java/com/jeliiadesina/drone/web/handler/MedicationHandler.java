@@ -82,6 +82,20 @@ public class MedicationHandler {
     });
   }
 
+  public void addMedication(RoutingContext ctx) {
+    String serialNumber = ctx.pathParam("serialNumber");
+    JsonObject medicationWithDroneSn = Medication.objectMedicationName(jsonBody(ctx))
+        .put(Drone.SERIAL_NUMBER, serialNumber);
+
+    eventBus.request(Medication.ADD_MEDICATION_TO_DRONE_ADDRESS, medicationWithDroneSn, res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200).end(medicationWithDroneSn.encodePrettily());
+      } else {
+        handleEventBusException(ctx, i10nConf, res.cause());
+      }
+    });
+  }
+
   public void imageUpload(RoutingContext ctx) {
     String name = ctx.pathParam(Medication.NAME);
     Optional<FileUpload> opt = ctx.fileUploads().stream().findFirst();

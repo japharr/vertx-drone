@@ -1,5 +1,6 @@
 package com.jeliiadesina.drone.repository;
 
+import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.Medication;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
@@ -51,6 +52,25 @@ public class MedicationRepositoryImpl implements MedicationRepository {
   }
 
   @Override
+  public Future<Double> totalDroneWeigh(String droneId) {
+    return sqlClient
+        .preparedQuery(selectTotalMedicationWeigh())
+        .execute(Tuple.of(droneId))
+        .compose(this::mapToTotalDroneWeigh);
+  }
+
+  private Future<Double> mapToTotalDroneWeigh(RowSet<Row> rs) {
+    Double total = 0.0;
+    if (rs.size() >= 1) {
+      var row = rs.iterator().next();
+      total = row.getDouble("total_weight");
+    }
+    return Future.succeededFuture(total);
+  }
+
+  //selectTotalMedicationWeigh
+
+  @Override
   public Future<JsonArray> findAll() {
     return sqlClient
         .preparedQuery(selectAllQuery())
@@ -89,6 +109,13 @@ public class MedicationRepositoryImpl implements MedicationRepository {
         .compose(count -> updateImage(count, data));
   }
 
+  @Override
+  public Future<JsonObject> updateDroneId(JsonObject data) {
+    String name = data.getString(Medication.NAME);
+    return countByName(name)
+        .compose(count -> updateDroneId(count, data));
+  }
+
   private Future<JsonObject> updateImage(int count, JsonObject data) {
     if(count == 0) {
       return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
@@ -100,6 +127,21 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     return sqlClient
         .preparedQuery(updateWithImage())
+        .execute(values)
+        .map(rs -> data);
+  }
+
+  private Future<JsonObject> updateDroneId(int count, JsonObject data) {
+    if(count == 0) {
+      return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
+    }
+
+    Tuple values = Tuple.of(
+        data.getString(Medication.NAME),
+        data.getString("droneId"));
+
+    return sqlClient
+        .preparedQuery(updateWithDroneId())
         .execute(values)
         .map(rs -> data);
   }
@@ -118,7 +160,8 @@ public class MedicationRepositoryImpl implements MedicationRepository {
         .put(NAME, row.getValue("name"))
         .put(WEIGHT, row.getValue("weight"))
         .put(CODE, row.getValue("code"))
-        .put(IMAGE, row.getValue("image"));
+        .put(IMAGE, row.getValue("image"))
+        .put(DRONE_ID, row.getValue("drone_id"));
   }
 
   private Future<JsonArray> mapToJsonArray(RowSet<Row> rows) {
