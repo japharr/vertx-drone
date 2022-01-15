@@ -8,7 +8,9 @@
 
     <logger name="io.netty" level="warn"/>
     <logger name="io.vertx" level="info"/>
-    <logger name="com.hazelcast" level="info"/>
+
+    <logger name="org.testcontainers." level="info"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
 
     <root level="debug">
         <appender-ref ref="STDOUT"/>
