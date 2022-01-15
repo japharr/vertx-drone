@@ -67,13 +67,13 @@ public class AppTest {
   }
 
   private final Map<String, JsonObject> drones = Map.of(
-      "Foo", new JsonObject()
+      "drone-01", new JsonObject()
       .put("serialNumber", "drone-01")
       .put("model", "Middleweight")
       .put("weightLimit", 20.0)
       .put("batteryCapacity", 10.0),
 
-      "Bar", new JsonObject()
+      "drone-02", new JsonObject()
           .put("serialNumber", "drone-02")
           .put("model", "Cruiserweight")
           .put("weightLimit", 40.0)
@@ -110,5 +110,24 @@ public class AppTest {
 
     List<Object> items = jsonPath.get("$");
     assertThat(items).isNotEmpty();
+  }
+
+  @Test
+  @Order(3)
+  @DisplayName("Fetch a drone")
+  void test_can_fetch_a_drone() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/api/v1/drones/drone-01")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    JsonObject droneO1 = drones.get("drone-01");
+    List<String> props = asList("serialNumber", "model", "weightLimit", "batteryCapacity");
+    props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(droneO1.getString(prop)));
+    assertThat(jsonPath.getString("state")).isEqualTo("IDLE");
   }
 }
