@@ -6,6 +6,9 @@ dependencies {
     val postgresVersion = project.extra["postgresVersion"]
     val logbackClassicVersion = project.extra["logbackClassicVersion"]
     val postgresTestContainerVersion = project.extra["postgresTestContainerVersion"]
+    val restAssuredVersion = project.extra["restAssuredVersion"]
+    val assertjVersion = project.extra["assertjVersion"]
+    val testContainersVersion = project.extra["testContainersVersion"]
 
     implementation("io.vertx:vertx-web:$vertxVersion")
     implementation("io.vertx:vertx-config:$vertxVersion")
@@ -19,6 +22,10 @@ dependencies {
     implementation("org.testcontainers:postgresql:$postgresTestContainerVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
+    testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+    testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
 }
 
 application {
