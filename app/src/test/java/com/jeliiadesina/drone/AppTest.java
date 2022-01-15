@@ -192,4 +192,54 @@ public class AppTest {
     List<String> props = asList("name", "weight", "code");
     props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(medication01.getString(prop)));
   }
+
+  @Test
+  @Order(7)
+  @DisplayName("Confirm drones has no loaded medications")
+  void test_drone_has_no_medications_loaded() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isEmpty();
+  }
+
+  @Test
+  @Order(8)
+  @DisplayName("Load a medication to drone")
+  void test_can_load_medication_to_drone() {
+    JsonObject medication01 = medications.get("medication-01");
+
+    given(requestSpecification)
+        .contentType(ContentType.JSON)
+        .body(medication01.encode())
+        .post("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK);
+  }
+
+  @Test
+  @Order(9)
+  @DisplayName("Confirm medication loaded to a particular drone")
+  void test_loaded_medications_is_not_empty() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+    assertThat(items).size().isEqualTo(1);
+  }
 }
