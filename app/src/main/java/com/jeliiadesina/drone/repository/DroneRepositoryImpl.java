@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.repository;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -45,7 +46,7 @@ public class DroneRepositoryImpl implements DroneRepository{
     if (rs.size() >= 1) {
      return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
     } else {
-      return Future.<JsonObject>failedFuture(new NotFoundException("drone.serialNumber.not-found"));
+      return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
     }
   }
 
@@ -82,7 +83,7 @@ public class DroneRepositoryImpl implements DroneRepository{
 
   private Future<JsonObject> persistDrone(int count, JsonObject data) {
     if(count > 0) {
-      return Future.failedFuture("drone.serialNumber.exist");
+      return Future.failedFuture(new AlreadyExistException(400, "drone.serialNumber.exist"));
     }
 
     Tuple values = Tuple.of(

@@ -16,8 +16,7 @@ import java.util.regex.Pattern;
 
 import static com.jeliiadesina.drone.util.ErrorUtil.errorField;
 import static com.jeliiadesina.drone.util.LocaleMessageUtil.getMessage;
-import static com.jeliiadesina.drone.util.RoutingContextUtil.getLanguageKey;
-import static com.jeliiadesina.drone.util.RoutingContextUtil.jsonBody;
+import static com.jeliiadesina.drone.util.RoutingContextUtil.*;
 
 public class MedicationHandler {
   private final static Logger logger = LoggerFactory.getLogger(MedicationHandler.class);
@@ -43,9 +42,7 @@ public class MedicationHandler {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200).end(medication.encodePrettily());
       } else {
-        ReplyException cause = (ReplyException) res.cause();
-        String failMessage = cause.getMessage();
-        ctx.response().setStatusCode(400).end(failMessage);
+        handleEventBusException(ctx, i10nConf, res.cause());
       }
     });
   }
@@ -68,7 +65,7 @@ public class MedicationHandler {
         ctx.response().setStatusCode(200)
             .end(((JsonObject)res.result().body()).encodePrettily());
       } else {
-        ctx.fail(500);
+        handleEventBusException(ctx, i10nConf, res.cause(), name);
       }
     });
   }
@@ -80,7 +77,7 @@ public class MedicationHandler {
         ctx.response().setStatusCode(200)
             .end(((JsonArray)res.result().body()).encodePrettily());
       } else {
-        ctx.fail(500);
+        handleEventBusException(ctx, i10nConf, res.cause(), serialNumber);
       }
     });
   }

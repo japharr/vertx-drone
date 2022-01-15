@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.service;
 
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import com.jeliiadesina.drone.repository.DroneRepository;
 import io.vertx.core.eventbus.Message;
@@ -25,7 +26,11 @@ public class DroneServiceImpl implements DroneService {
           if(rx.succeeded()) {
             msg.reply(data);
           } else {
-            msg.fail(500, rx.cause().getLocalizedMessage());
+            if(rx.cause() instanceof AlreadyExistException ex) {
+              msg.fail(ex.getCode(), ex.getMessage());
+            } else {
+              msg.fail(500, rx.cause().getMessage());
+            }
           }
         });
   }
@@ -55,8 +60,8 @@ public class DroneServiceImpl implements DroneService {
           if(rx.succeeded()) {
             msg.reply(rx.result());
           } else {
-              if(rx.cause() instanceof NotFoundException) {
-                  msg.fail(404, rx.cause().getMessage());
+              if(rx.cause() instanceof NotFoundException ex) {
+                  msg.fail(ex.getCode(), ex.getMessage());
               } else {
                   msg.fail(500, rx.cause().getMessage());
               }
@@ -77,8 +82,8 @@ public class DroneServiceImpl implements DroneService {
           if(rx.succeeded()) {
             msg.reply(rx.result());
           } else {
-              if(rx.cause() instanceof NotFoundException) {
-                  msg.fail(404, rx.cause().getMessage());
+              if(rx.cause() instanceof NotFoundException ex) {
+                  msg.fail(ex.getCode(), ex.getMessage());
               } else {
                   msg.fail(500, rx.cause().getMessage());
               }

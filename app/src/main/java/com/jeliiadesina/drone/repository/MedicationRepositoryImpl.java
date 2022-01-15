@@ -1,6 +1,8 @@
 package com.jeliiadesina.drone.repository;
 
 import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.exception.AlreadyExistException;
+import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,8 +39,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     return sqlClient
         .preparedQuery(selectOneByName())
         .execute(Tuple.of(name))
-        .map(rs -> rs.iterator().next())
-        .flatMap(row -> Future.future(p -> p.complete(mapToJsonObject(row))));
+        .compose(this::mapToFirstResult);
   }
 
   @Override
@@ -66,7 +67,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
   private Future<JsonObject> persist(int count, JsonObject data) {
     if(count > 0) {
-      return Future.failedFuture("medication.name.exist");
+      return Future.failedFuture(new AlreadyExistException(400, "medication.name.exist"));
     }
 
     Tuple values = Tuple.of(
@@ -90,7 +91,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
   private Future<JsonObject> updateImage(int count, JsonObject data) {
     if(count == 0) {
-      return Future.failedFuture("medication.name.notFound");
+      return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
     }
 
     Tuple values = Tuple.of(
@@ -101,6 +102,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
         .preparedQuery(updateWithImage())
         .execute(values)
         .map(rs -> data);
+  }
+
+  private Future<JsonObject> mapToFirstResult(RowSet<Row> rs) {
+    if (rs.size() >= 1) {
+      return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
+    } else {
+      return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
+    }
   }
 
   private JsonObject mapToJsonObject(Row row) {
