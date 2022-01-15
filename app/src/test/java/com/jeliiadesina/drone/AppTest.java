@@ -22,7 +22,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ public class AppTest {
   static void prepareSpec() {
     requestSpecification = new RequestSpecBuilder()
         .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))
-        .setBaseUri("http://localhost:8084/")
+        .setBaseUri("http://localhost:8084/api/v1")
         .build();
   }
 
@@ -81,6 +80,18 @@ public class AppTest {
           .put("batteryCapacity", 60.0)
   );
 
+  private final Map<String, JsonObject> medications = Map.of(
+      "medication-01", new JsonObject()
+          .put("name", "medication-01")
+          .put("weight", 30.0)
+          .put("code", "MED01"),
+
+      "medication-02", new JsonObject()
+          .put("name", "medication-02")
+          .put("weight", 20.0)
+          .put("code", "MED02")
+  );
+
   @Test
   @Order(1)
   @DisplayName("Register some drones")
@@ -89,10 +100,10 @@ public class AppTest {
       given(requestSpecification)
           .contentType(ContentType.JSON)
           .body(registration.encode())
-          .post("/api/v1/drones")
+          .post("/drones")
           .then()
           .assertThat()
-          .statusCode(200);
+          .statusCode(HttpStatus.SC_OK);
     });
   }
 
@@ -103,7 +114,7 @@ public class AppTest {
     JsonPath jsonPath = given()
         .spec(requestSpecification)
         .accept(ContentType.JSON)
-        .get("/api/v1/drones")
+        .get("/drones")
         .then()
         .assertThat()
         .statusCode(HttpStatus.SC_OK)
@@ -120,7 +131,7 @@ public class AppTest {
     JsonPath jsonPath = given()
         .spec(requestSpecification)
         .accept(ContentType.JSON)
-        .get("/api/v1/drones/drone-01")
+        .get("/drones/drone-01")
         .then()
         .assertThat()
         .statusCode(HttpStatus.SC_OK)
@@ -129,6 +140,57 @@ public class AppTest {
     JsonObject droneO1 = drones.get("drone-01");
     List<String> props = asList("serialNumber", "model", "weightLimit", "batteryCapacity");
     props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(droneO1.getString(prop)));
+    assertThat(jsonPath.getString("state")).isEqualTo("IDLE");
+  }
+
+  @Test
+  @Order(4)
+  @DisplayName("Create some medications")
+  void test_can_create_medications() {
+    medications.forEach((key, registration) -> {
+      given(requestSpecification)
+          .contentType(ContentType.JSON)
+          .body(registration.encode())
+          .post("/medications")
+          .then()
+          .assertThat()
+          .statusCode(HttpStatus.SC_OK);
+    });
+  }
+
+  @Test
+  @Order(5)
+  @DisplayName("Fetch all medications")
+  void test_can_fetch_registered_medications() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+  }
+
+  @Test
+  @Order(6)
+  @DisplayName("Fetch a medication")
+  void test_can_fetch_a_medication() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/medications/medication-01")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    JsonObject medication01 = medications.get("medication-01");
+    List<String> props = asList("name", "weight", "code");
+    props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(medication01.getString(prop)));
     assertThat(jsonPath.getString("state")).isEqualTo("IDLE");
   }
 }
