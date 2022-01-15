@@ -29,6 +29,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 @ExtendWith(VertxExtension.class)
@@ -53,8 +54,8 @@ public class AppTest {
   void prepare(Vertx vertx, VertxTestContext vtx) {
     JsonObject conf = new JsonObject()
         .put("http", new JsonObject().put("port", 8084).put("context-path", "/api/v1"))
-            .put("db", new JsonObject().put("host", postgres.getContainerIpAddress()).put("port", postgres.getMappedPort(5432))
-                .put("database", "test").put("user", "test").put("password", "test"))
+        .put("db", new JsonObject().put("host", postgres.getContainerIpAddress()).put("port", postgres.getMappedPort(5432))
+            .put("database", "test").put("user", "test").put("password", "test"))
         .put("i18n", new JsonObject().put("tags", new JsonArray().add("en").add("fr")));
 
     DeploymentOptions options = new DeploymentOptions().setConfig(conf);
@@ -68,10 +69,10 @@ public class AppTest {
 
   private final Map<String, JsonObject> drones = Map.of(
       "drone-01", new JsonObject()
-      .put("serialNumber", "drone-01")
-      .put("model", "Middleweight")
-      .put("weightLimit", 20.0)
-      .put("batteryCapacity", 10.0),
+          .put("serialNumber", "drone-01")
+          .put("model", "Middleweight")
+          .put("weightLimit", 20.0)
+          .put("batteryCapacity", 10.0),
 
       "drone-02", new JsonObject()
           .put("serialNumber", "drone-02")
