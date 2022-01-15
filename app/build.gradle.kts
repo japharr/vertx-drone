@@ -35,6 +35,6 @@ application {
     mainClass.set("com.jeliiadesina.drone.App")
 }
 
-tasks.named<Test>("test") {
+tasks.test {
     useJUnitPlatform()
 }

@@ -1,6 +1,10 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType.MOCHA
+
 plugins {
     java
     application
+    id("com.adarshr.test-logger") version "3.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0" apply false
 }
 
 allprojects {
@@ -26,4 +30,18 @@ subprojects {
 
     apply(plugin = "java")
     apply(plugin = "application")
+    apply(plugin = "com.github.johnrengelman.shadow")
+    apply(plugin = "com.adarshr.test-logger")
+
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "16"
+        targetCompatibility = "16"
+    }
+
+    testlogger {
+        theme = MOCHA
+        slowThreshold = 5000
+        showStandardStreams = true
+        showFullStackTraces = true
+    }
 }
