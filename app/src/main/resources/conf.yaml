@@ -1,5 +1,5 @@
 http:
-  port: 8083
+  port: 8080
   context-path: /api/v1
 
 db:
