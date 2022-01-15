@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.service;
 
 import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.exception.NotFoundException;
 import com.jeliiadesina.drone.repository.DroneRepository;
 import com.jeliiadesina.drone.repository.MedicationRepository;
 import io.vertx.core.Future;
@@ -78,18 +79,16 @@ public class MedicationServiceImpl implements MedicationService {
 
     String serialNumber = data.getString(Drone.SERIAL_NUMBER);
     droneRepository.findDroneBySerialNumber(serialNumber)
-        .onComplete(rx -> {
-            if(rx.failed()) {
-                System.out.println("error occurred: " + rx.cause().getMessage());
-            }
-        })
         .compose(json -> repository.findByDroneId(json.getString(Drone.ID)))
         .onComplete(rx -> {
             if(rx.succeeded()) {
                 msg.reply(rx.result());
             } else {
-                System.out.println("error occurred: " + rx.cause().getMessage());
-                msg.fail(501, rx.cause().getMessage());
+              if(rx.cause() instanceof NotFoundException) {
+                msg.fail(404, rx.cause().getMessage());
+              } else {
+                msg.fail(500, rx.cause().getMessage());
+              }
             }
         });
   }
