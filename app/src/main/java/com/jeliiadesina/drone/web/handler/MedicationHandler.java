@@ -53,7 +53,7 @@ public class MedicationHandler {
         ctx.response().setStatusCode(200)
             .end(((JsonArray)res.result().body()).encodePrettily());
       } else {
-        ctx.fail(500);
+        handleEventBusException(ctx, i10nConf, res.cause());
       }
     });
   }

@@ -68,6 +68,6 @@ public interface Medication {
   }
 
   static String selectAllQuery() {
-    return "SELECT uuid as id, name, weight, code, image FROM medications";
+    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications";
   }
 }
