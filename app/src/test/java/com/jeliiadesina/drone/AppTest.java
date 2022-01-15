@@ -191,6 +191,5 @@ public class AppTest {
     JsonObject medication01 = medications.get("medication-01");
     List<String> props = asList("name", "weight", "code");
     props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(medication01.getString(prop)));
-    assertThat(jsonPath.getString("state")).isEqualTo("IDLE");
   }
 }
