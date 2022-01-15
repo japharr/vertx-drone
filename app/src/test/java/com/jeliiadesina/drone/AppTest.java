@@ -1,4 +1,3 @@
-
 package com.jeliiadesina.drone;
 
 import com.jeliiadesina.drone.vertcle.DatabaseVerticle;
@@ -216,13 +215,18 @@ public class AppTest {
   void test_can_load_medication_to_drone() {
     JsonObject medication01 = medications.get("medication-01");
 
-    given(requestSpecification)
+    String serialNumber = "drone-02";
+    JsonPath jsonPath = given(requestSpecification)
         .contentType(ContentType.JSON)
         .body(medication01.encode())
-        .post("/drones/drone-02/medications")
+        .post("/drones/" + serialNumber + "/medications")
         .then()
         .assertThat()
-        .statusCode(HttpStatus.SC_OK);
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    assertThat(jsonPath.getString("serialNumber")).isEqualTo(serialNumber);
+    assertThat(jsonPath.getString("name")).isEqualTo(medication01.getString("name"));
   }
 
   @Test
@@ -241,5 +245,23 @@ public class AppTest {
     List<Object> items = jsonPath.get("$");
     assertThat(items).isNotEmpty();
     assertThat(items).size().isEqualTo(1);
+  }
+
+  @Test
+  @Order(10)
+  @DisplayName("Load an already medication to drone")
+  void test_medication_already_loaded_same_to_drone() {
+    JsonObject medication01 = medications.get("medication-01");
+
+    String body = given(requestSpecification)
+        .contentType(ContentType.JSON)
+        .body(medication01.encode())
+        .post("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_BAD_REQUEST)
+        .extract().body().asString();
+
+    assertThat(body).isEqualTo("Medication already loaded to this drone");
   }
 }
