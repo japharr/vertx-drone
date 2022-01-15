@@ -157,6 +157,8 @@ public class MedicationServiceImpl implements MedicationService {
           } else {
             if(rx.cause() instanceof NotFoundException ex) {
               msg.fail(ex.getCode(), ex.getMessage());
+            } else if(rx.cause() instanceof DroneException ex) {
+              msg.fail(ex.getCode(), ex.getMessage());
             } else {
               msg.fail(500, rx.cause().getMessage());
             }
