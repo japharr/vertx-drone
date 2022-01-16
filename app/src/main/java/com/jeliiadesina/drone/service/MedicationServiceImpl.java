@@ -150,7 +150,7 @@ public class MedicationServiceImpl implements MedicationService {
     }).compose(this::verifyDrone)
         .compose(this::verifyDroneWeight)
         .compose(this::loadMedicationToDrone)
-        .compose(r -> this.updateDroneState(r, Drone.StateType.LOADING))
+        .compose(this::updateDroneState)
         .onComplete(rx -> {
           if(rx.succeeded()) {
             msg.reply(rx.result());
@@ -170,16 +170,20 @@ public class MedicationServiceImpl implements MedicationService {
     JsonObject medication = object.getJsonObject("medication");
     JsonObject drone = object.getJsonObject("drone");
     JsonObject data = new JsonObject()
+        .put("newState", object.getString("newState"))
         .put(Medication.NAME, medication.getString(Medication.NAME))
             .put("droneId", drone.getString(Drone.ID));
 
-    return repository.updateDroneId(data);
+    return repository.updateDroneId(data)
+        .compose(r -> Future.future(p -> p.complete(data)));
   }
 
-  private Future<JsonObject> updateDroneState(JsonObject object, Drone.StateType state) {
+  private Future<JsonObject> updateDroneState(JsonObject object) {
     String droneId = object.getString(Medication.DRONE_ID);
+    logger.info("newState: {}", object.getString("newState"));
+    var newState  = Drone.StateType.valueOf(object.getString("newState"));
 
-    return droneRepository.updateState(droneId, state)
+    return droneRepository.updateState(droneId, newState)
         .compose(r -> Future.future(p -> p.complete(object)));
   }
 
@@ -193,6 +197,12 @@ public class MedicationServiceImpl implements MedicationService {
 
    if(expectedWeight > droneWeightLimit) {
       return Future.failedFuture(new DroneException("drone.error.exceededLimit"));
+    }
+
+   if(expectedWeight == droneWeightLimit) {
+     object.put("newState", Drone.StateType.LOADED);
+   }else if (expectedWeight < droneWeightLimit) {
+      object.put("newState", Drone.StateType.LOADING);
     }
 
     return Future.succeededFuture(object);
