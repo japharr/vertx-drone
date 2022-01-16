@@ -167,6 +167,27 @@ java -jar app/build/libs/app-all.jar
         "droneId" : null
     }
 
+### Get All available drones Drone
+### Request
+
+`GET /drones?state=AVAILABLE`
+
+    http :8080/api/v1/drones?state=AVAILABLE
+
+### Response
+
+    HTTP/1.1 200 OK
+    content-length: 194
+    
+    [ {
+        "id" : "33b53000-fb62-4dd1-9afb-9a987bb69d5c",
+        "serialNumber" : "drone-03",
+        "model" : "Middleweight",
+        "weightLimit" : 88.0,
+        "batteryCapacity" : 50.0,
+        "state" : "IDLE"
+    } ]
+
 ### Load a Medication to a Drone
 
 ### Request
