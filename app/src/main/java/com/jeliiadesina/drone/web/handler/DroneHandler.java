@@ -40,8 +40,8 @@ public class DroneHandler {
 
   public void loadAllDrones(RoutingContext ctx) {
     String state = ctx.queryParams().get("state");
-    if(state != null) {
-      loadByState(ctx);
+    if("AVAILABLE".equalsIgnoreCase(state)) {
+      loadAvailable(ctx);
       return;
     }
 
@@ -58,6 +58,17 @@ public class DroneHandler {
   public void loadByState(RoutingContext ctx) {
     String state = ctx.queryParams().get("state");
     eventBus.request(Drone.FETCH_BY_STATE_ADDRESS, new JsonObject().put("state", state), res -> {
+      if(res.succeeded()) {
+        ctx.response().setStatusCode(200)
+            .end(((JsonArray)res.result().body()).encodePrettily());
+      } else {
+        ctx.fail(500);
+      }
+    });
+  }
+
+  public void loadAvailable(RoutingContext ctx) {
+    eventBus.request(Drone.FETCH_AVAILABLE_ADDRESS, new JsonObject(), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
             .end(((JsonArray)res.result().body()).encodePrettily());

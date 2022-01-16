@@ -24,6 +24,7 @@ public interface Drone {
   String REGISTER_ADDRESS = "drone.register";
   String FETCH_ALL_ADDRESS = "drone.fetch-all";
   String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
+  String FETCH_AVAILABLE_ADDRESS = "drone.fetch-available";
   String FETCH_BY_ID_ADDRESS = "drone.fetch-id";
   String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-serial-number";
 
@@ -72,6 +73,11 @@ public interface Drone {
   static String selectDronesByState() {
     return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
         "WHERE state = $1";
+  }
+
+  static String selectAvailableDronesByState() {
+    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
+        "WHERE (state = 'IDLE' OR state = 'LOADING') AND battery_capacity > 25";
   }
 
   static String updateWithState() {

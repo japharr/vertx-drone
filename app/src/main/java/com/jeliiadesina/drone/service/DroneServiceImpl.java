@@ -109,4 +109,16 @@ public class DroneServiceImpl implements DroneService {
           }
         });
   }
+
+  @Override
+  public void fetchAvailableDrones(Message<Object> msg) {
+    droneRepository.findDAvailableDrones()
+        .onComplete(rx -> {
+          if(rx.succeeded()) {
+            msg.reply(rx.result());
+          } else {
+            msg.fail(501, rx.cause().getMessage());
+          }
+        });
+  }
 }

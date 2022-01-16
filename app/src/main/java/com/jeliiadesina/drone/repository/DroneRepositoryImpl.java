@@ -1,7 +1,6 @@
 package com.jeliiadesina.drone.repository;
 
 import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
@@ -15,8 +14,6 @@ import io.vertx.sqlclient.Tuple;
 import java.util.UUID;
 
 import static com.jeliiadesina.drone.entity.Drone.*;
-import static com.jeliiadesina.drone.entity.Medication.updateWithDroneId;
-import static com.jeliiadesina.drone.entity.Medication.updateWithImage;
 
 public class DroneRepositoryImpl implements DroneRepository{
   private final SqlClient sqlClient;
@@ -86,6 +83,14 @@ public class DroneRepositoryImpl implements DroneRepository{
     return sqlClient
         .preparedQuery(selectDronesByState())
         .execute(Tuple.of(state))
+        .flatMap(this::mapToJsonArray);
+  }
+
+  @Override
+  public Future<JsonArray> findDAvailableDrones() {
+    return sqlClient
+        .preparedQuery(selectAvailableDronesByState())
+        .execute()
         .flatMap(this::mapToJsonArray);
   }
 
