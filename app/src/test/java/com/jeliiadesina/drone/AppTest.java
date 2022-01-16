@@ -248,6 +248,24 @@ public class AppTest {
   }
 
   @Test
+  @Order(9)
+  @DisplayName("Fetch available drones")
+  void test_available_drones() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones?state=AVAILABLE")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+    assertThat(items).size().isEqualTo(1);
+  }
+
+  @Test
   @Order(10)
   @DisplayName("Load an already medication to drone")
   void test_medication_already_loaded_same_to_drone() {
