@@ -2,12 +2,18 @@ http:
   port: 8080
   context-path: /api/v1
 
+eb.addresses:
+  db.drone: eb.db.drone
+  db.medication: eb.db.medication
+
 db:
   host: 127.0.0.1
   port: 5432
   database: drones_db
   user: devuser
   password: pass123
+  pool:
+    max-size: 5
 
 i18n:
   tags:

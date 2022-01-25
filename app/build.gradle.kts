@@ -43,7 +43,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.jeliiadesina.drone.App")
+    mainClass.set("com.jeliiadesina.drone.MainVerticle")
 }
 
 tasks.test {

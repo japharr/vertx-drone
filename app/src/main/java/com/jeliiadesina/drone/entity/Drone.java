@@ -1,5 +1,7 @@
 package com.jeliiadesina.drone.entity;
 
+import am.ik.yavi.builder.ValidatorBuilder;
+import am.ik.yavi.core.Validator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.jeliiadesina.drone.entity.enumeration.Model;
@@ -21,6 +23,12 @@ public class Drone {
     private Double batteryCapacity;
     @JsonProperty("state")
     private State state;
+
+    public static final Validator<Drone> validator = ValidatorBuilder.<Drone>of()
+        .constraint(Drone::getSerialNumber, "username", c -> c.notNull())
+        .constraint(Drone::getWeightLimit, "weightLimit", c -> c.notNull().lessThanOrEqual(500.0).greaterThanOrEqual(0.0))
+        .constraint(Drone::getBatteryCapacity, "batteryCapacity", c -> c.notNull().greaterThanOrEqual(0.0).lessThanOrEqual(100.0))
+        .build();
 
     public Drone () {}
 
