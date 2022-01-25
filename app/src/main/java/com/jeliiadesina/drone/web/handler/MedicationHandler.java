@@ -1,9 +1,8 @@
 package com.jeliiadesina.drone.web.handler;
 
-import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.entity.Drone01;
+import com.jeliiadesina.drone.entity.Medication01;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.FileUpload;
@@ -36,9 +35,9 @@ public class MedicationHandler {
   }
 
   public void createMedication(RoutingContext ctx) {
-    JsonObject medication = Medication.object(jsonBody(ctx));
+    JsonObject medication = Medication01.object(jsonBody(ctx));
 
-    eventBus.request(Medication.CREATE_ADDRESS, medication, res -> {
+    eventBus.request(Medication01.CREATE_ADDRESS, medication, res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200).end(medication.encodePrettily());
       } else {
@@ -48,7 +47,7 @@ public class MedicationHandler {
   }
 
   public void fetchAllMedications(RoutingContext ctx) {
-    eventBus.request(Medication.FETCH_ALL_ADDRESS, new JsonObject(), res -> {
+    eventBus.request(Medication01.FETCH_ALL_ADDRESS, new JsonObject(), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
             .end(((JsonArray)res.result().body()).encodePrettily());
@@ -60,7 +59,7 @@ public class MedicationHandler {
 
   public void getByName(RoutingContext ctx) {
     String name = ctx.pathParam("name");
-    eventBus.request(Medication.FETCH_BY_NAME_ADDRESS, new JsonObject().put(Medication.NAME, name), res -> {
+    eventBus.request(Medication01.FETCH_BY_NAME_ADDRESS, new JsonObject().put(Medication01.NAME, name), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
             .end(((JsonObject)res.result().body()).encodePrettily());
@@ -72,7 +71,7 @@ public class MedicationHandler {
 
   public void getBySerialNumber(RoutingContext ctx) {
     String serialNumber = ctx.pathParam("serialNumber");
-    eventBus.request(Medication.FETCH_BY_SERIAL_NUMBER_ADDRESS, new JsonObject().put(Drone.SERIAL_NUMBER, serialNumber), res -> {
+    eventBus.request(Medication01.FETCH_BY_SERIAL_NUMBER_ADDRESS, new JsonObject().put(Drone01.SERIAL_NUMBER, serialNumber), res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200)
             .end(((JsonArray)res.result().body()).encodePrettily());
@@ -84,10 +83,10 @@ public class MedicationHandler {
 
   public void addMedication(RoutingContext ctx) {
     String serialNumber = ctx.pathParam("serialNumber");
-    JsonObject medicationWithDroneSn = Medication.objectMedicationName(jsonBody(ctx))
-        .put(Drone.SERIAL_NUMBER, serialNumber);
+    JsonObject medicationWithDroneSn = Medication01.objectMedicationName(jsonBody(ctx))
+        .put(Drone01.SERIAL_NUMBER, serialNumber);
 
-    eventBus.request(Medication.ADD_MEDICATION_TO_DRONE_ADDRESS, medicationWithDroneSn, res -> {
+    eventBus.request(Medication01.ADD_MEDICATION_TO_DRONE_ADDRESS, medicationWithDroneSn, res -> {
       if(res.succeeded()) {
         ctx.response().setStatusCode(200).end(medicationWithDroneSn.encodePrettily());
       } else {
@@ -97,11 +96,11 @@ public class MedicationHandler {
   }
 
   public void imageUpload(RoutingContext ctx) {
-    String name = ctx.pathParam(Medication.NAME);
+    String name = ctx.pathParam(Medication01.NAME);
     Optional<FileUpload> opt = ctx.fileUploads().stream().findFirst();
     if(opt.isPresent() && opt.get().contentType().contains("image")) {
       FileUpload fileUpload = opt.get();
-      eventBus.request(Medication.UPLOAD_IMAGE_ADDRESS,
+      eventBus.request(Medication01.UPLOAD_IMAGE_ADDRESS,
           new JsonObject()
               .put("name", name)
               .put("image", fileUpload.uploadedFileName())
@@ -144,12 +143,12 @@ public class MedicationHandler {
   private JsonArray verify(JsonObject body, RoutingContext ctx) {
     JsonArray jsonArray = new JsonArray();
 
-    if(!body.containsKey(Medication.NAME))
-      jsonArray.add(errorField(Medication.NAME, getMessage(getLanguageKey(ctx, i10nConf), "medication.name.required")));
-    if(!body.containsKey(Medication.WEIGHT))
-      jsonArray.add(errorField(Medication.WEIGHT, getMessage(getLanguageKey(ctx, i10nConf), "medication.weight.required")));
-    if(!body.containsKey(Medication.CODE))
-      jsonArray.add(errorField(Medication.CODE, getMessage(getLanguageKey(ctx, i10nConf), "medication.code.required")));
+    if(!body.containsKey(Medication01.NAME))
+      jsonArray.add(errorField(Medication01.NAME, getMessage(getLanguageKey(ctx, i10nConf), "medication.name.required")));
+    if(!body.containsKey(Medication01.WEIGHT))
+      jsonArray.add(errorField(Medication01.WEIGHT, getMessage(getLanguageKey(ctx, i10nConf), "medication.weight.required")));
+    if(!body.containsKey(Medication01.CODE))
+      jsonArray.add(errorField(Medication01.CODE, getMessage(getLanguageKey(ctx, i10nConf), "medication.code.required")));
 
     return jsonArray;
   }
@@ -157,14 +156,14 @@ public class MedicationHandler {
   private JsonArray validate(JsonObject body, RoutingContext ctx) {
     JsonArray jsonArray = new JsonArray();
 
-    String name = body.getString(Medication.NAME);
+    String name = body.getString(Medication01.NAME);
     if(validateName(name)) {
-      jsonArray.add(errorField(Medication.NAME, getMessage(getLanguageKey(ctx, i10nConf), "medication.ame.invalid")));
+      jsonArray.add(errorField(Medication01.NAME, getMessage(getLanguageKey(ctx, i10nConf), "medication.ame.invalid")));
     }
 
-    String code = body.getString(Medication.CODE);
+    String code = body.getString(Medication01.CODE);
     if(validateCode(code)) {
-      jsonArray.add(errorField(Medication.CODE, getMessage(getLanguageKey(ctx, i10nConf), "medication.code.invalid")));
+      jsonArray.add(errorField(Medication01.CODE, getMessage(getLanguageKey(ctx, i10nConf), "medication.code.invalid")));
     }
 
     return jsonArray;

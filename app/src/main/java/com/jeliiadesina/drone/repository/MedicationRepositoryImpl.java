@@ -1,7 +1,6 @@
 package com.jeliiadesina.drone.repository;
 
-import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.entity.Medication01;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
@@ -14,7 +13,7 @@ import io.vertx.sqlclient.Tuple;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.entity.Medication.*;
+import static com.jeliiadesina.drone.entity.Medication01.*;
 
 public class MedicationRepositoryImpl implements MedicationRepository {
   private final SqlClient sqlClient;
@@ -80,7 +79,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
   @Override
   public Future<JsonObject> persistMedication(JsonObject data) {
-    String name = data.getString(Medication.NAME);
+    String name = data.getString(Medication01.NAME);
     return countByName(name)
         .compose(count -> persist(count, data));
   }
@@ -92,9 +91,9 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
     Tuple values = Tuple.of(
         UUID.randomUUID().toString(),
-        data.getString(Medication.NAME),
-        data.getDouble(Medication.WEIGHT),
-        data.getString(Medication.CODE));
+        data.getString(Medication01.NAME),
+        data.getDouble(Medication01.WEIGHT),
+        data.getString(Medication01.CODE));
 
     return sqlClient
         .preparedQuery(insertOneQuery())
@@ -104,14 +103,14 @@ public class MedicationRepositoryImpl implements MedicationRepository {
 
   @Override
   public Future<JsonObject> updateImage(JsonObject data) {
-    String name = data.getString(Medication.NAME);
+    String name = data.getString(Medication01.NAME);
     return countByName(name)
         .compose(count -> updateImage(count, data));
   }
 
   @Override
   public Future<JsonObject> updateDroneId(JsonObject data) {
-    String name = data.getString(Medication.NAME);
+    String name = data.getString(Medication01.NAME);
     return countByName(name)
         .compose(count -> updateDroneId(count, data));
   }
@@ -122,7 +121,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     Tuple values = Tuple.of(
-        data.getString(Medication.NAME),
+        data.getString(Medication01.NAME),
         data.getString("image"));
 
     return sqlClient
@@ -137,7 +136,7 @@ public class MedicationRepositoryImpl implements MedicationRepository {
     }
 
     Tuple values = Tuple.of(
-        data.getString(Medication.NAME),
+        data.getString(Medication01.NAME),
         data.getString("droneId"));
 
     return sqlClient

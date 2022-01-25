@@ -1,10 +1,9 @@
 package com.jeliiadesina.drone.vertcle;
 
-import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.entity.Drone01;
+import com.jeliiadesina.drone.entity.Medication01;
 import com.jeliiadesina.drone.repository.DroneRepository;
 import com.jeliiadesina.drone.repository.DroneRepositoryImpl;
-import com.jeliiadesina.drone.repository.MedicationRepository;
 import com.jeliiadesina.drone.repository.MedicationRepositoryImpl;
 import com.jeliiadesina.drone.service.DroneService;
 import com.jeliiadesina.drone.service.DroneServiceImpl;
@@ -13,7 +12,6 @@ import com.jeliiadesina.drone.service.MedicationServiceImpl;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.sqlclient.Pool;
@@ -46,19 +44,19 @@ public class DatabaseVerticle extends AbstractVerticle {
   }
 
   private Future<Void> configureEventBusConsumers(Void unused) {
-    vertx.eventBus().consumer(Drone.REGISTER_ADDRESS).handler(droneService::registerDrone);
-    vertx.eventBus().consumer(Drone.FETCH_ALL_ADDRESS).handler(droneService::fetchAllDrones);
-    vertx.eventBus().consumer(Drone.FETCH_BY_STATE_ADDRESS).handler(droneService::fetchDronesByState);
-    vertx.eventBus().consumer(Drone.FETCH_AVAILABLE_ADDRESS).handler(droneService::fetchAvailableDrones);
-    vertx.eventBus().consumer(Drone.FETCH_BY_ID_ADDRESS).handler(droneService::fetchById);
-    vertx.eventBus().consumer(Drone.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(droneService::fetchBySerialNumber);
+    vertx.eventBus().consumer(Drone01.REGISTER_ADDRESS).handler(droneService::registerDrone);
+    vertx.eventBus().consumer(Drone01.FETCH_ALL_ADDRESS).handler(droneService::fetchAllDrones);
+    vertx.eventBus().consumer(Drone01.FETCH_BY_STATE_ADDRESS).handler(droneService::fetchDronesByState);
+    vertx.eventBus().consumer(Drone01.FETCH_AVAILABLE_ADDRESS).handler(droneService::fetchAvailableDrones);
+    vertx.eventBus().consumer(Drone01.FETCH_BY_ID_ADDRESS).handler(droneService::fetchById);
+    vertx.eventBus().consumer(Drone01.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(droneService::fetchBySerialNumber);
 
-    vertx.eventBus().consumer(Medication.CREATE_ADDRESS).handler(medicationService::create);
-    vertx.eventBus().consumer(Medication.UPLOAD_IMAGE_ADDRESS).handler(medicationService::updateImage);
-    vertx.eventBus().consumer(Medication.FETCH_ALL_ADDRESS).handler(medicationService::fetchAll);
-    vertx.eventBus().consumer(Medication.FETCH_BY_NAME_ADDRESS).handler(medicationService::fetchByName);
-    vertx.eventBus().consumer(Medication.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(medicationService::fetchByDrone);
-    vertx.eventBus().consumer(Medication.ADD_MEDICATION_TO_DRONE_ADDRESS).handler(medicationService::addMedicationToDrone);
+    vertx.eventBus().consumer(Medication01.CREATE_ADDRESS).handler(medicationService::create);
+    vertx.eventBus().consumer(Medication01.UPLOAD_IMAGE_ADDRESS).handler(medicationService::updateImage);
+    vertx.eventBus().consumer(Medication01.FETCH_ALL_ADDRESS).handler(medicationService::fetchAll);
+    vertx.eventBus().consumer(Medication01.FETCH_BY_NAME_ADDRESS).handler(medicationService::fetchByName);
+    vertx.eventBus().consumer(Medication01.FETCH_BY_SERIAL_NUMBER_ADDRESS).handler(medicationService::fetchByDrone);
+    vertx.eventBus().consumer(Medication01.ADD_MEDICATION_TO_DRONE_ADDRESS).handler(medicationService::addMedicationToDrone);
 
     return Future.future(Promise::complete);
   }

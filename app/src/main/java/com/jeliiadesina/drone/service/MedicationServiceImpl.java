@@ -1,19 +1,16 @@
 package com.jeliiadesina.drone.service;
 
-import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.entity.Drone01;
+import com.jeliiadesina.drone.entity.Medication01;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.DroneException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import com.jeliiadesina.drone.repository.DroneRepository;
 import com.jeliiadesina.drone.repository.MedicationRepository;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +18,9 @@ import java.util.Set;
 
 public class MedicationServiceImpl implements MedicationService {
   private static final Logger logger = LoggerFactory.getLogger(MedicationService.class);
-  private static final Set<Drone.StateType> forbidden =
-      Set.of(Drone.StateType.DELIVERED, Drone.StateType.DELIVERING,
-          Drone.StateType.RETURNING);
+  private static final Set<Drone01.StateType> forbidden =
+      Set.of(Drone01.StateType.DELIVERED, Drone01.StateType.DELIVERING,
+          Drone01.StateType.RETURNING);
 
   private final MedicationRepository repository;
   private final DroneRepository droneRepository;
@@ -78,7 +75,7 @@ public class MedicationServiceImpl implements MedicationService {
       return;
     }
 
-    String name = data.getString(Medication.NAME);
+    String name = data.getString(Medication01.NAME);
     repository.findByName(name)
         .onComplete(rx -> {
           if(rx.succeeded()) {
@@ -100,9 +97,9 @@ public class MedicationServiceImpl implements MedicationService {
       return;
     }
 
-    String serialNumber = data.getString(Drone.SERIAL_NUMBER);
+    String serialNumber = data.getString(Drone01.SERIAL_NUMBER);
     droneRepository.findDroneBySerialNumber(serialNumber)
-        .compose(json -> repository.findByDroneId(json.getString(Drone.ID)))
+        .compose(json -> repository.findByDroneId(json.getString(Drone01.ID)))
         .onComplete(rx -> {
             if(rx.succeeded()) {
                 msg.reply(rx.result());
@@ -135,8 +132,8 @@ public class MedicationServiceImpl implements MedicationService {
       return;
     }
 
-    String serialNumber = data.getString(Drone.SERIAL_NUMBER);
-    String name = data.getString(Medication.NAME);
+    String serialNumber = data.getString(Drone01.SERIAL_NUMBER);
+    String name = data.getString(Medication01.NAME);
 
     CompositeFuture.all(
         repository.findByName(name),
@@ -171,17 +168,17 @@ public class MedicationServiceImpl implements MedicationService {
     JsonObject drone = object.getJsonObject("drone");
     JsonObject data = new JsonObject()
         .put("newState", object.getString("newState"))
-        .put(Medication.NAME, medication.getString(Medication.NAME))
-            .put("droneId", drone.getString(Drone.ID));
+        .put(Medication01.NAME, medication.getString(Medication01.NAME))
+            .put("droneId", drone.getString(Drone01.ID));
 
     return repository.updateDroneId(data)
         .compose(r -> Future.future(p -> p.complete(data)));
   }
 
   private Future<JsonObject> updateDroneState(JsonObject object) {
-    String droneId = object.getString(Medication.DRONE_ID);
+    String droneId = object.getString(Medication01.DRONE_ID);
     logger.info("newState: {}", object.getString("newState"));
-    var newState  = Drone.StateType.valueOf(object.getString("newState"));
+    var newState  = Drone01.StateType.valueOf(object.getString("newState"));
 
     return droneRepository.updateState(droneId, newState)
         .compose(r -> Future.future(p -> p.complete(object)));
@@ -192,17 +189,17 @@ public class MedicationServiceImpl implements MedicationService {
     var medication = object.getJsonObject("medication");
     var totalWeight = object.getDouble("totalWeight");
 
-    var expectedWeight = totalWeight + medication.getDouble(Medication.WEIGHT);
-    var droneWeightLimit = drone.getDouble(Drone.WEIGHT_LIMIT);
+    var expectedWeight = totalWeight + medication.getDouble(Medication01.WEIGHT);
+    var droneWeightLimit = drone.getDouble(Drone01.WEIGHT_LIMIT);
 
    if(expectedWeight > droneWeightLimit) {
       return Future.failedFuture(new DroneException("drone.error.exceededLimit"));
     }
 
    if(expectedWeight == droneWeightLimit) {
-     object.put("newState", Drone.StateType.LOADED);
+     object.put("newState", Drone01.StateType.LOADED);
    }else if (expectedWeight < droneWeightLimit) {
-      object.put("newState", Drone.StateType.LOADING);
+      object.put("newState", Drone01.StateType.LOADING);
     }
 
     return Future.succeededFuture(object);
@@ -212,8 +209,8 @@ public class MedicationServiceImpl implements MedicationService {
     var drone = object.getJsonObject("drone");
     var medication = object.getJsonObject("medication");
 
-    var droneId = drone.getString(Drone.ID);
-    var medicationDroneId = medication.getString(Medication.DRONE_ID);
+    var droneId = drone.getString(Drone01.ID);
+    var medicationDroneId = medication.getString(Medication01.DRONE_ID);
     if(medicationDroneId != null && !medicationDroneId.equalsIgnoreCase(droneId)) {
       return Future.failedFuture(new DroneException("medication.error.already-loaded"));
     }
@@ -222,17 +219,17 @@ public class MedicationServiceImpl implements MedicationService {
       return Future.failedFuture(new DroneException("drone.error.already-loaded"));
     }
 
-    var state = Drone.StateType.valueOf(drone.getString(Drone.STATE));
+    var state = Drone01.StateType.valueOf(drone.getString(Drone01.STATE));
     if(forbidden.contains(state)) {
       return Future.failedFuture(new DroneException("drone.error.not-idle-loading"));
     }
 
-    var batteryCapacity = drone.getDouble(Drone.BATTERY_CAPACITY);
+    var batteryCapacity = drone.getDouble(Drone01.BATTERY_CAPACITY);
     if(batteryCapacity < 25) {
       return Future.failedFuture(new DroneException("drone.error.battery-tow-low"));
     }
 
-    var totalWeigh = repository.totalDroneWeigh(drone.getString(Drone.ID));
+    var totalWeigh = repository.totalDroneWeigh(drone.getString(Drone01.ID));
 
     return totalWeigh.compose(totalWeight -> Future.succeededFuture(object.put("totalWeight", totalWeight)));
   }

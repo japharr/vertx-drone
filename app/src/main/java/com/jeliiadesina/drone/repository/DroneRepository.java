@@ -1,6 +1,6 @@
 package com.jeliiadesina.drone.repository;
 
-import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Drone01;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,11 +14,11 @@ public interface DroneRepository {
 
   Future<JsonObject> findById(String id);
 
-  Future<JsonArray> findDronesByState(Drone.StateType state);
+  Future<JsonArray> findDronesByState(Drone01.StateType state);
 
   Future<JsonArray> findDAvailableDrones();
 
   Future<JsonObject> persistDrone(JsonObject data);
 
-  Future<Drone.StateType> updateState(String droneId, Drone.StateType state);
+  Future<Drone01.StateType> updateState(String droneId, Drone01.StateType state);
 }

@@ -1,14 +1,13 @@
 package com.jeliiadesina.drone.vertcle;
 
-import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Medication;
+import com.jeliiadesina.drone.entity.Drone01;
+import com.jeliiadesina.drone.entity.Medication01;
 import com.jeliiadesina.drone.web.handler.DroneHandler;
 import com.jeliiadesina.drone.web.handler.MedicationHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -96,10 +95,10 @@ public class WebVerticle extends AbstractVerticle {
 
   private ValidationHandler registerDroneValidationHandler() {
     ObjectSchemaBuilder bodySchemaBuilder = objectSchema()
-        .property(Drone.SERIAL_NUMBER, stringSchema())
-        .property(Drone.MODEL, stringSchema())
-        .property(Drone.WEIGHT_LIMIT, numberSchema())
-        .property(Drone.BATTERY_CAPACITY, numberSchema());
+        .property(Drone01.SERIAL_NUMBER, stringSchema())
+        .property(Drone01.MODEL, stringSchema())
+        .property(Drone01.WEIGHT_LIMIT, numberSchema())
+        .property(Drone01.BATTERY_CAPACITY, numberSchema());
 
     return ValidationHandler
         .builder(schemaParser)
@@ -109,9 +108,9 @@ public class WebVerticle extends AbstractVerticle {
 
   private ValidationHandler createMedicationValidationHandler() {
     ObjectSchemaBuilder bodySchemaBuilder = objectSchema()
-        .property(Medication.NAME, stringSchema())
-        .property(Medication.CODE, stringSchema())
-        .property(Medication.WEIGHT, numberSchema());
+        .property(Medication01.NAME, stringSchema())
+        .property(Medication01.CODE, stringSchema())
+        .property(Medication01.WEIGHT, numberSchema());
 
     return ValidationHandler
         .builder(schemaParser)

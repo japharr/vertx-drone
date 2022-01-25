@@ -1,6 +1,6 @@
 package com.jeliiadesina.drone.service;
 
-import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Drone01;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import com.jeliiadesina.drone.repository.DroneRepository;
@@ -54,7 +54,7 @@ public class DroneServiceImpl implements DroneService {
       return;
     }
 
-    String id = data.getString(Drone.ID);
+    String id = data.getString(Drone01.ID);
     droneRepository.findById(id)
         .onComplete(rx -> {
           if(rx.succeeded()) {
@@ -76,7 +76,7 @@ public class DroneServiceImpl implements DroneService {
       return;
     }
 
-    String serialNumber = data.getString(Drone.SERIAL_NUMBER);
+    String serialNumber = data.getString(Drone01.SERIAL_NUMBER);
     droneRepository.findDroneBySerialNumber(serialNumber)
         .onComplete(rx -> {
           if(rx.succeeded()) {
@@ -98,7 +98,7 @@ public class DroneServiceImpl implements DroneService {
       return;
     }
 
-    Drone.StateType state = Drone.StateType.valueOf(data.getString(Drone.STATE, "IDLE"));
+    Drone01.StateType state = Drone01.StateType.valueOf(data.getString(Drone01.STATE, "IDLE"));
 
     droneRepository.findDronesByState(state)
         .onComplete(rx -> {

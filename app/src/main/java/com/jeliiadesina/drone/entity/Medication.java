@@ -1,73 +1,74 @@
 package com.jeliiadesina.drone.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-public interface Medication {
-  // field-name
-  String NAME = "name";
-  String WEIGHT = "weight";
-  String CODE = "code";
-  String IMAGE = "image";
-  String DRONE_ID = "droneId";
+@DataObject(generateConverter = true)
+@JsonPropertyOrder({"name", "weight", "code", "image"})
+public class Medication {
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("weight")
+    private Double weight;
+    @JsonProperty("code")
+    private String code;
+    @JsonProperty("image")
+    private String image;
 
-  // event-buss addresses
-  String CREATE_ADDRESS = "medication.create";
-  String FETCH_ALL_ADDRESS = "medication.fetch-all";
-  String UPLOAD_IMAGE_ADDRESS = "medication.upload-image";
-  String FETCH_BY_NAME_ADDRESS = "drone.fetch-name";
-  String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-drone-serialnumber";
-  String ADD_MEDICATION_TO_DRONE_ADDRESS = "medication.add.to-drone";
+    public Medication () {}
 
+    public Medication (String json) {
+        this(new JsonObject(json));
+    }
 
-  // construct Drone object
-  static JsonObject object(JsonObject body) {
-    return new JsonObject()
-        .put(NAME, body.getString(NAME))
-        .put(WEIGHT, body.getDouble(WEIGHT))
-        .put(CODE, body.getString(CODE))
-        .put(IMAGE, body.getString(IMAGE));
-  }
+    public Medication (JsonObject jsonObject) {
+        MedicationConverter.fromJson(jsonObject, this);
+    }
 
-  static JsonObject objectMedicationName(JsonObject body) {
-    return new JsonObject()
-        .put(NAME, body.getString(NAME));
-  }
+    public JsonObject toJson() {
+        JsonObject jsonObject = new JsonObject();
+        MedicationConverter.toJson(this, jsonObject);
+        return jsonObject;
+    }
 
-  // sql queries
-  static String insertOneQuery() {
-    return "INSERT INTO medications (uuid, name, weight, code, created_date, last_modified_date ) VALUES($1, $2, $3, $4, current_timestamp, current_timestamp)";
-  }
+    public Medication (Medication other) {
+        this.name = other.name;
+        this.weight = other.weight;
+        this.code = other.code;
+        this.image = other.image;
+    }
 
-  static String countByNameQuery() {
-    return "SELECT count(*) FROM medications WHERE name = $1";
-  }
+    public String getName() {
+        return name;
+    }
 
-  static String selectOneByName() {
-    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications " +
-        "WHERE name = $1 LIMIT 1";
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  static String selectAllByDroneId() {
-    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications " +
-        "WHERE drone_uuid = $1";
-  }
+    public Double getWeight() {
+        return weight;
+    }
 
-  static String updateWithImage() {
-    return "UPDATE medications SET image = $2, last_modified_date = current_timestamp " +
-        "WHERE name = $1 RETURNING *";
-  }
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
 
-  static String updateWithDroneId() {
-    return "UPDATE medications SET drone_uuid = $2, last_modified_date = current_timestamp " +
-        "WHERE name = $1 RETURNING *";
-  }
+    public String getCode() {
+        return code;
+    }
 
-  static String selectTotalMedicationWeigh() {
-    return "SELECT drone_uuid as drone_id, SUM(weight) as total_weight FROM medications " +
-        "WHERE (drone_uuid = $1) GROUP BY drone_uuid";
-  }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-  static String selectAllQuery() {
-    return "SELECT uuid as id, name, weight, code, image, drone_uuid as drone_id FROM medications";
-  }
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
 }

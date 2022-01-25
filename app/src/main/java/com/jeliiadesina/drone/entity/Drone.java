@@ -1,87 +1,88 @@
 package com.jeliiadesina.drone.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.jeliiadesina.drone.entity.enumeration.Model;
+import com.jeliiadesina.drone.entity.enumeration.State;
+
+import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.List;
-import java.util.Map;
+@DataObject(generateConverter = true)
+@JsonPropertyOrder({"serialNumber", "model", "weightLimit", "batteryCapacity", "state"})
+public class Drone {
+    @JsonProperty("serialNumber")
+    private String serialNumber;
+    @JsonProperty("model")
+    private Model model;
+    @JsonProperty("weightLimit")
+    private Double weightLimit;
+    @JsonProperty("batteryCapacity")
+    private Double batteryCapacity;
+    @JsonProperty("state")
+    private State state;
 
-public interface Drone {
-  // field-name
-  String ID = "id";
-  String SERIAL_NUMBER = "serialNumber";
-  String MODEL = "model";
-  String WEIGHT_LIMIT = "weightLimit";
-  String BATTERY_CAPACITY = "batteryCapacity";
-  String STATE = "state";
+    public Drone () {}
 
-  // validation
-  int SERIAL_NUMBER_MAX = 100;
-  List<String> ACCEPTABLE_MODELS = List.of("Lightweight", "Middleweight", "Cruiserweight", "Heavyweight");
-  double WEIGHT_LIMIT_MAX = 500.0;
-  double BATTERY_CAPACITY_MAX = 100.0;
+    public Drone (String json) {
+        this(new JsonObject(json));
+    }
 
-  // event-buss addresses
-  String REGISTER_ADDRESS = "drone.register";
-  String FETCH_ALL_ADDRESS = "drone.fetch-all";
-  String FETCH_BY_STATE_ADDRESS = "drone.fetch-state";
-  String FETCH_AVAILABLE_ADDRESS = "drone.fetch-available";
-  String FETCH_BY_ID_ADDRESS = "drone.fetch-id";
-  String FETCH_BY_SERIAL_NUMBER_ADDRESS = "drone.fetch-serial-number";
+    public Drone (JsonObject jsonObject) {
+        DroneConverter.fromJson(jsonObject, this);
+    }
 
-  public enum StateType{
-    IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING
-  }
+    public JsonObject toJson() {
+        JsonObject jsonObject = new JsonObject();
+        DroneConverter.toJson(this, jsonObject);
+        return jsonObject;
+    }
 
-  // error codes
-  static Map<Integer, String> ERROR_CODES = Map.of(101, "drone.serialNumber.exist");
+    public Drone (Drone other) {
+        this.serialNumber = other.serialNumber;
+        this.model = other.model;
+        this.weightLimit = other.weightLimit;
+        this.batteryCapacity = other.batteryCapacity;
+        this.state = other.state;
+    }
 
-  // construct Drone object
-  static JsonObject droneObject(JsonObject body) {
-    return new JsonObject()
-        .put(SERIAL_NUMBER, body.getString(SERIAL_NUMBER))
-        .put(MODEL, body.getString(MODEL))
-        .put(WEIGHT_LIMIT, body.getDouble(WEIGHT_LIMIT))
-        .put(BATTERY_CAPACITY, body.getDouble(BATTERY_CAPACITY))
-        .put(STATE, StateType.IDLE);
-  }
+    public String getSerialNumber() {
+        return serialNumber;
+    }
 
-  static String insertDrone() {
-    return "INSERT INTO drones VALUES($1, $2, $3, $4, $5, $6, current_timestamp, current_timestamp)";
-  }
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
-  static String countBySerialNumber() {
-    return "SELECT count(*) FROM drones WHERE serial_number = $1";
-  }
+    public Model getModel() {
+        return model;
+    }
 
-  static String countById() {
-    return "SELECT count(*) FROM drones WHERE uuid = $1";
-  }
+    public void setModel(Model model) {
+        this.model = model;
+    }
 
-  static String selectOneBySerialNumber() {
-    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
-        "WHERE serial_number = $1 LIMIT 1";
-  }
-  static String selectOneById() {
-    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
-        "WHERE id = $1 LIMIT 1";
-  }
+    public Double getWeightLimit() {
+        return weightLimit;
+    }
 
-  static String selectAllDrones() {
-    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones";
-  }
+    public void setWeightLimit(Double weightLimit) {
+        this.weightLimit = weightLimit;
+    }
 
-  static String selectDronesByState() {
-    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
-        "WHERE state = $1";
-  }
+    public Double getBatteryCapacity() {
+        return batteryCapacity;
+    }
 
-  static String selectAvailableDronesByState() {
-    return "SELECT uuid as id, serial_number, model, weight_limit, battery_capacity, state FROM drones " +
-        "WHERE (state = 'IDLE' OR state = 'LOADING') AND battery_capacity > 25";
-  }
+    public void setBatteryCapacity(Double batteryCapacity) {
+        this.batteryCapacity = batteryCapacity;
+    }
 
-  static String updateWithState() {
-    return "UPDATE drones SET state = $2, last_modified_date = current_timestamp " +
-        "WHERE uuid = $1 RETURNING *";
-  }
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
 }

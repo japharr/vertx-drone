@@ -1,6 +1,6 @@
 package com.jeliiadesina.drone.repository;
 
-import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.Drone01;
 import com.jeliiadesina.drone.exception.AlreadyExistException;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.Future;
@@ -13,7 +13,7 @@ import io.vertx.sqlclient.Tuple;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.entity.Drone.*;
+import static com.jeliiadesina.drone.entity.Drone01.*;
 
 public class DroneRepositoryImpl implements DroneRepository{
   private final SqlClient sqlClient;
@@ -96,7 +96,7 @@ public class DroneRepositoryImpl implements DroneRepository{
 
   @Override
   public Future<JsonObject> persistDrone(JsonObject data) {
-    String serialNumber = data.getString(Drone.SERIAL_NUMBER);
+    String serialNumber = data.getString(Drone01.SERIAL_NUMBER);
     return countDroneBySerialNumber(serialNumber)
         .compose(count -> persistDrone(count, data));
   }
@@ -126,11 +126,11 @@ public class DroneRepositoryImpl implements DroneRepository{
 
     Tuple values = Tuple.of(
         UUID.randomUUID().toString(),
-        data.getString(Drone.SERIAL_NUMBER),
-        data.getString(Drone.MODEL),
-        data.getDouble(Drone.WEIGHT_LIMIT),
-        data.getDouble(Drone.BATTERY_CAPACITY),
-        data.getString(Drone.STATE));
+        data.getString(Drone01.SERIAL_NUMBER),
+        data.getString(Drone01.MODEL),
+        data.getDouble(Drone01.WEIGHT_LIMIT),
+        data.getDouble(Drone01.BATTERY_CAPACITY),
+        data.getString(Drone01.STATE));
 
     return sqlClient
         .preparedQuery(insertDrone())

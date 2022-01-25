@@ -1,3 +1,6 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+apply(plugin = "com.github.johnrengelman.shadow")
 
 dependencies {
     val vertxVersion = project.extra["vertxVersion"]
@@ -10,13 +13,21 @@ dependencies {
     val assertjVersion = project.extra["assertjVersion"]
     val testContainersVersion = project.extra["testContainersVersion"]
     val nettyResolverVersion = project.extra["nettyResolverVersion"]
+    val yaviVersion = project.extra["yaviVersion"]
 
     implementation("io.vertx:vertx-web:$vertxVersion")
     implementation("io.vertx:vertx-config:$vertxVersion")
     implementation("io.vertx:vertx-config-yaml:$vertxVersion")
     implementation("io.vertx:vertx-pg-client:$vertxVersion")
     implementation("io.vertx:vertx-web-validation:$vertxVersion")
+    implementation("io.vertx:vertx-service-proxy:$vertxVersion")
 
+    implementation("io.vertx:vertx-codegen:$vertxVersion:processor")
+
+    annotationProcessor("io.vertx:vertx-codegen:$vertxVersion:processor")
+    annotationProcessor("io.vertx:vertx-service-proxy:$vertxVersion")
+
+    implementation("am.ik.yavi:yavi:$yaviVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
