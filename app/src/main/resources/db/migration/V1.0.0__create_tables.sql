@@ -10,6 +10,7 @@ last_modified_date TIMESTAMP
 );
 
 ALTER TABLE drones ADD CONSTRAINT pk_drone_id PRIMARY KEY (uuid);
+ALTER TABLE drones ADD CONSTRAINT uk_serial_number UNIQUE (serial_number);
 
 CREATE TABLE medications (
 uuid VARCHAR(500) NOT NULL,
@@ -23,3 +24,4 @@ last_modified_date TIMESTAMP
 );
 
 ALTER TABLE medications ADD CONSTRAINT pk_medication_id PRIMARY KEY (uuid);
+ALTER TABLE medications ADD CONSTRAINT uk_name UNIQUE (name);

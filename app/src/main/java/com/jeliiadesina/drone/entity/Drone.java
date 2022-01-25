@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.jeliiadesina.drone.entity.enumeration.Model;
 import com.jeliiadesina.drone.entity.enumeration.State;
 
+import com.jeliiadesina.drone.util.EnumeratedConstraint;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
@@ -23,12 +24,6 @@ public class Drone {
     private Double batteryCapacity;
     @JsonProperty("state")
     private State state;
-
-    public static final Validator<Drone> validator = ValidatorBuilder.<Drone>of()
-        .constraint(Drone::getSerialNumber, "username", c -> c.notNull())
-        .constraint(Drone::getWeightLimit, "weightLimit", c -> c.notNull().lessThanOrEqual(500.0).greaterThanOrEqual(0.0))
-        .constraint(Drone::getBatteryCapacity, "batteryCapacity", c -> c.notNull().greaterThanOrEqual(0.0).lessThanOrEqual(100.0))
-        .build();
 
     public Drone () {}
 
@@ -64,6 +59,12 @@ public class Drone {
 
     public Model getModel() {
         return model;
+    }
+
+    public String getModelStr() {
+        if(model == null) return null;
+
+        return model.name();
     }
 
     public void setModel(Model model) {

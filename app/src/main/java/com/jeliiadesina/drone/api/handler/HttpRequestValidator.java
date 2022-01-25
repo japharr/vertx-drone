@@ -1,5 +1,6 @@
 package com.jeliiadesina.drone.api.handler;
 
+import com.jeliiadesina.drone.api.model.DroneDto;
 import com.jeliiadesina.drone.entity.Drone;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -12,14 +13,14 @@ import static com.jeliiadesina.drone.util.RestApiUtil.restResponse;
 public class HttpRequestValidator {
     public static Handler<RoutingContext> validateDrone() {
         return ctx -> {
-            var drone = decodeBodyToObject(ctx, Drone.class);
+            var drone = decodeBodyToObject(ctx, DroneDto.class);
 
             if(drone == null) {
                 ctx.fail(400);
                 return;
             }
 
-            var violations = Drone.validator.validate(drone);
+            var violations = DroneDto.validator.validate(drone);
             if(violations.isValid()) {
                 ctx.next();
                 return;
