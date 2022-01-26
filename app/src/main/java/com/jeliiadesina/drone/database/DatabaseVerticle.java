@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.database;
 
 import com.jeliiadesina.drone.config.PgConfig;
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
+import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
 import io.vertx.core.*;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
@@ -19,7 +20,6 @@ public class DatabaseVerticle extends AbstractVerticle {
 
     private PgPool pgPool;
 
-
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
         LOGGER.info("deploying DatabaseVerticle...,");
@@ -30,10 +30,17 @@ public class DatabaseVerticle extends AbstractVerticle {
         pgPool = PgPool.pool(vertx, connectOptions, poolOptions);
 
         String droneDbEbAddress = config().getJsonObject(EB_ADDRESSES).getString(EB_DB_DRONE_ADDRESS);
+        String medicationDbEbAddress = config().getJsonObject(EB_ADDRESSES).getString(EB_DB_MEDICATION_ADDRESS);
 
-        //Promise<Void> dronePromise = Promise.promise();
+        Promise<Void> dronePromise = Promise.promise();
+        Promise<Void> medicationPromise = Promise.promise();
 
-        DroneDatabaseService.create(pgPool, onCreate(droneDbEbAddress, startPromise, DroneDatabaseService.class));
+        DroneDatabaseService.create(pgPool, onCreate(droneDbEbAddress, dronePromise, DroneDatabaseService.class));
+        MedicationDatabaseService.create(pgPool, onCreate(medicationDbEbAddress, medicationPromise, MedicationDatabaseService.class));
+
+        CompositeFuture.all(dronePromise.future(), medicationPromise.future())
+            .onSuccess(r -> startPromise.complete())
+            .onFailure(rx -> startPromise.fail(rx.getCause()));
     }
 
     @Override
