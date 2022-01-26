@@ -66,11 +66,12 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
     }
 
     @Override
-    public Future<JsonObject> findByName(String name) {
+    public Future<Medication> findByName(String name) {
         return pgPool
             .preparedQuery(selectOneByName())
             .execute(Tuple.of(name))
-            .compose(this::mapToFirstResult);
+            .compose(this::mapToFirstResult)
+            .compose(jsonObject -> Future.succeededFuture(mapToMedication(jsonObject)));
     }
 
     @Override
@@ -89,6 +90,14 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
             .flatMap(rs -> Future.succeededFuture(mapToJsonArray(rs)));
     }
 
+    @Override
+    public Future<Void> updateMedicationWithDrone(String medicationId, String droneId) {
+        return pgPool
+            .preparedQuery(updateWithDroneId())
+            .execute(Tuple.of(medicationId, droneId))
+            .compose(r -> Future.succeededFuture());
+    }
+
     private JsonObject mapToJsonObject(Row row) {
         return new JsonObject()
             .put("id", row.getValue("id"))
@@ -98,6 +107,9 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
             .put("image", row.getValue("image"));
     }
 
+    private Medication mapToMedication(JsonObject jsonObject) {
+        return new Medication(jsonObject);
+    }
     private JsonArray mapToJsonArray(RowSet<Row> rows) {
         JsonArray data = new JsonArray();
         rows.forEach(row -> data.add(mapToJsonObject(row)));

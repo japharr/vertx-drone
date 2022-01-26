@@ -67,6 +67,7 @@ public class WebVerticle extends AbstractVerticle {
             .handler(MedicationApi.create(medicationDatabaseService));
 
         router.get(DRONE_GET_MEDICATIONS_BY_DRONE_SERIALNUMBER).handler(MedicationApi.getByDroneSerialNumber(medicationDatabaseService, droneDatabaseService));
+        router.post(DRONE_ADD_MEDICATION_TO_DRONE).handler(MedicationApi.addMedicationToDrone(medicationDatabaseService, droneDatabaseService));
 
         return httpServer.
             requestHandler(router)

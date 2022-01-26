@@ -2,7 +2,9 @@ package com.jeliiadesina.drone.api.handler;
 
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
+import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.Medication;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
@@ -66,6 +68,21 @@ public class MedicationApi {
                         restResponse(ctx, 500, res.cause().getMessage());
                     }
                 });
+        };
+    }
+
+    public static Handler<RoutingContext> addMedicationToDrone(MedicationDatabaseService medicationDatabaseService, DroneDatabaseService droneDatabaseService) {
+        return ctx -> {
+            String serialNumber = ctx.pathParam("serialNumber");
+
+            Medication medication = decodeBodyToObject(ctx, Medication.class);
+
+            Future<Drone> droneFuture = droneDatabaseService.findBySerialNumber(serialNumber);
+            Future<Medication> medicationFuture = medicationDatabaseService.findByName(medication.getName());
+
+
+
+
         };
     }
 }

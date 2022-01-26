@@ -23,7 +23,8 @@ public interface MedicationDatabaseService {
 
     Future<Void> persist(Medication medication);
     Future<JsonObject> findById(String id);
-    Future<JsonObject> findByName(String name);
+    Future<Medication> findByName(String name);
     Future<JsonArray> findAll();
     Future<JsonArray> findAllByDroneId(String droneId);
+    Future<Void> updateMedicationWithDrone(String medicationId, String droneId);
 }
