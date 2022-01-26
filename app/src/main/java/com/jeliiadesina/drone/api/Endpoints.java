@@ -1,9 +1,13 @@
 package com.jeliiadesina.drone.api;
 
 public final class Endpoints {
-  public static final String GET_DRONES = "/drones";
-  public static final String REGISTER_NEW_DRONE = "/register";
-  public static final String GET_DRONE_BY_USERNAME = "/drones/:serialNumber";
+  public static final String DRONE_GET_DRONES = "/drones";
+  public static final String DRONE_REGISTER_NEW_DRONE = "/register";
+  public static final String DRONE_GET_DRONE_BY_SERIALNUMBER = "/drones/:serialNumber";
+
+  public static final String MEDICATION_GET_MEDICATIONS = "/medications";
+  public static final String MEDICATION_REGISTER_NEW_MEDICATION = "/medications";
+  public static final String MEDICATION_GET_MEDICATION_BY_NAME = "/medications/:name";
 
   private Endpoints() {}
 }

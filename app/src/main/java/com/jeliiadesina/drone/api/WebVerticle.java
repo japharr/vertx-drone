@@ -51,10 +51,10 @@ public class WebVerticle extends AbstractVerticle {
         router.post().handler(bodyHandler);
         router.put().handler(bodyHandler);
 
-        router.get(GET_DRONES).handler(DroneApi.getAll(droneDatabaseService));
-        router.get(GET_DRONE_BY_USERNAME).handler(DroneApi.getBySerialNumber(droneDatabaseService));
+        router.get(DRONE_GET_DRONES).handler(DroneApi.getAll(droneDatabaseService));
+        router.get(DRONE_GET_DRONE_BY_SERIALNUMBER).handler(DroneApi.getBySerialNumber(droneDatabaseService));
 
-        router.post(REGISTER_NEW_DRONE)
+        router.post(DRONE_REGISTER_NEW_DRONE)
             .handler(HttpRequestValidator.validateDrone())
             .handler(DroneApi.register(droneDatabaseService));
 

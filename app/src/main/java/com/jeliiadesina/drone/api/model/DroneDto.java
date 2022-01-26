@@ -11,7 +11,6 @@ public record DroneDto(String serialNumber, String model, Double weightLimit, Do
 
     public static final Validator<DroneDto> validator = ValidatorBuilder.<DroneDto>of()
         .constraint(DroneDto::serialNumber, "serialNumber", c -> c.notNull().notBlank())
-        //.constraint(Drone::getModel, "model", c -> c.notBlank())
         .constraint(DroneDto::model, "model", c -> c.notNull().predicate(modelConstraint))
         .constraint(DroneDto::weightLimit, "weightLimit", c -> c.notNull().lessThanOrEqual(500.0).greaterThanOrEqual(0.0))
         .constraint(DroneDto::batteryCapacity, "batteryCapacity", c -> c.notNull().greaterThanOrEqual(0.0).lessThanOrEqual(100.0))
