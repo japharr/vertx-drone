@@ -104,7 +104,7 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
         if (rs.size() >= 1) {
             return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
         } else {
-            return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
+            return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
         }
     }
 }
