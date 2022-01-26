@@ -2,7 +2,9 @@ package com.jeliiadesina.drone.api;
 
 import com.jeliiadesina.drone.api.handler.DroneApi;
 import com.jeliiadesina.drone.api.handler.HttpRequestValidator;
+import com.jeliiadesina.drone.api.handler.MedicationApi;
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
+import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -21,18 +23,19 @@ public class WebVerticle extends AbstractVerticle {
     private static final String PORT_KEY = "port";
     private static final String EB_ADDRESSES = "eb.addresses";
     private static final String EB_DB_DRONE_ADDRESS = "db.drone";
+    private static final String EB_DB_MEDICATION_ADDRESS = "db.medication";
 
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
 
-        var droneDbEbAddress = config()
-            .getJsonObject(EB_ADDRESSES).getString(EB_DB_DRONE_ADDRESS);
+        var droneDbEbAddress = config().getJsonObject(EB_ADDRESSES).getString(EB_DB_DRONE_ADDRESS);
+        var medicationDbEbAddress = config().getJsonObject(EB_ADDRESSES).getString(EB_DB_MEDICATION_ADDRESS);
 
         var droneDatabaseService = DroneDatabaseService.createProxy(vertx, droneDbEbAddress);
+        var medicationDatabaseService = MedicationDatabaseService.createProxy(vertx, medicationDbEbAddress);
 
-
-        startServer(droneDatabaseService)
+        startServer(droneDatabaseService, medicationDatabaseService)
             .onComplete(r -> {
                 if(r.succeeded())
                     startPromise.complete();
@@ -41,7 +44,7 @@ public class WebVerticle extends AbstractVerticle {
             });
     }
 
-    private Future<HttpServer> startServer(DroneDatabaseService droneDatabaseService) {
+    private Future<HttpServer> startServer(DroneDatabaseService droneDatabaseService, MedicationDatabaseService medicationDatabaseService) {
         int httpServerPort = config().getJsonObject(HTTP_KEY).getInteger(PORT_KEY);
 
         var httpServer = vertx.createHttpServer();
@@ -53,10 +56,15 @@ public class WebVerticle extends AbstractVerticle {
 
         router.get(DRONE_GET_DRONES).handler(DroneApi.getAll(droneDatabaseService));
         router.get(DRONE_GET_DRONE_BY_SERIALNUMBER).handler(DroneApi.getBySerialNumber(droneDatabaseService));
-
         router.post(DRONE_REGISTER_NEW_DRONE)
             .handler(HttpRequestValidator.validateDrone())
             .handler(DroneApi.register(droneDatabaseService));
+
+        router.get(MEDICATION_GET_MEDICATIONS).handler(MedicationApi.getAll(medicationDatabaseService));
+        router.get(MEDICATION_GET_MEDICATION_BY_NAME).handler(MedicationApi.getByName(medicationDatabaseService));
+        router.post(MEDICATION_REGISTER_NEW_MEDICATION)
+            .handler(HttpRequestValidator.validateMedication())
+            .handler(MedicationApi.create(medicationDatabaseService));
 
         return httpServer.
             requestHandler(router)
