@@ -16,6 +16,8 @@ import io.vertx.sqlclient.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.jeliiadesina.drone.query.DroneQuery.*;
@@ -41,7 +43,6 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
                 resultHandler.handle(Future.failedFuture(throwable));
             });
     }
-
 
     @Override
     public Future<Void> persist(Drone drone) {
@@ -69,11 +70,12 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
     }
 
     @Override
-    public Future<JsonObject> findBySerialNumber(String serialNumber) {
+    public Future<Drone> findBySerialNumber(String serialNumber) {
         return pgPool
             .preparedQuery(selectOneBySerialNumber())
             .execute(Tuple.of(serialNumber))
-            .compose(this::mapToFirstResult);
+            .compose(this::mapToFirstResult)
+            .compose(jsonObject -> Future.succeededFuture(new Drone(jsonObject)));
     }
 
     @Override
@@ -94,9 +96,19 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
             .put("state", row.getValue("state"));
     }
 
+    private Drone mapToDrone(JsonObject jsonObject) {
+        return new Drone(jsonObject);
+    }
+
     private JsonArray mapToJsonArray(RowSet<Row> rows) {
         JsonArray data = new JsonArray();
         rows.forEach(row -> data.add(mapToJsonObject(row)));
+        return data;
+    }
+
+    private List<Drone> mapToDrones(RowSet<Row> rows) {
+        List<Drone> data = new ArrayList<>();
+        rows.forEach(row -> data.add(mapToDrone(mapToJsonObject(row))));
         return data;
     }
 

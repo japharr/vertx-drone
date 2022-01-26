@@ -17,11 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.query.MedicationQuery.selectAll;
-import static com.jeliiadesina.drone.query.MedicationQuery.selectOneById;
-import static com.jeliiadesina.drone.query.MedicationQuery.selectOneByName;
-import static com.jeliiadesina.drone.query.MedicationQuery.count;
-import static com.jeliiadesina.drone.query.MedicationQuery.insertMedication;
+import static com.jeliiadesina.drone.query.MedicationQuery.*;
 
 public class MedicationDatabaseServiceImpl implements MedicationDatabaseService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DroneDatabaseServiceImpl.class);
@@ -82,6 +78,14 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
         return pgPool
             .preparedQuery(selectAll())
             .execute()
+            .flatMap(rs -> Future.succeededFuture(mapToJsonArray(rs)));
+    }
+
+    @Override
+    public Future<JsonArray> findAllByDroneId(String droneId) {
+        return pgPool
+            .preparedQuery(selectAllByDroneId())
+            .execute(Tuple.of(droneId))
             .flatMap(rs -> Future.succeededFuture(mapToJsonArray(rs)));
     }
 

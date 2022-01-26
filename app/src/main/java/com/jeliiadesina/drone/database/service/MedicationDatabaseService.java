@@ -25,4 +25,5 @@ public interface MedicationDatabaseService {
     Future<JsonObject> findById(String id);
     Future<JsonObject> findByName(String name);
     Future<JsonArray> findAll();
+    Future<JsonArray> findAllByDroneId(String droneId);
 }

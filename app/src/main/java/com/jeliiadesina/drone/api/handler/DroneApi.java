@@ -29,7 +29,7 @@ public class DroneApi {
             droneDatabaseService.findBySerialNumber(serialNumber)
                 .onComplete(res -> {
                     if(res.succeeded()) {
-                        restResponse(ctx, 200, res.result().encode());
+                        restResponse(ctx, 200, res.result().toJson().encode());
                     } else {
                         restResponse(ctx, 500, res.cause().getMessage());
                     }

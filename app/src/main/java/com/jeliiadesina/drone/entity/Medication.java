@@ -6,8 +6,10 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true)
-@JsonPropertyOrder({"name", "weight", "code", "image"})
+@JsonPropertyOrder({"id", "name", "weight", "code", "image"})
 public class Medication {
+    @JsonProperty("id")
+    private String id;
     @JsonProperty("name")
     private String name;
     @JsonProperty("weight")
@@ -34,10 +36,19 @@ public class Medication {
     }
 
     public Medication (Medication other) {
+        this.id = other.id;
         this.name = other.name;
         this.weight = other.weight;
         this.code = other.code;
         this.image = other.image;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

@@ -12,8 +12,10 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 @DataObject(generateConverter = true)
-@JsonPropertyOrder({"serialNumber", "model", "weightLimit", "batteryCapacity", "state"})
+@JsonPropertyOrder({"id", "serialNumber", "model", "weightLimit", "batteryCapacity", "state"})
 public class Drone {
+    @JsonProperty("id")
+    private String id;
     @JsonProperty("serialNumber")
     private String serialNumber;
     @JsonProperty("model")
@@ -42,11 +44,20 @@ public class Drone {
     }
 
     public Drone (Drone other) {
+        this.id = other.id;
         this.serialNumber = other.serialNumber;
         this.model = other.model;
         this.weightLimit = other.weightLimit;
         this.batteryCapacity = other.batteryCapacity;
         this.state = other.state;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getSerialNumber() {

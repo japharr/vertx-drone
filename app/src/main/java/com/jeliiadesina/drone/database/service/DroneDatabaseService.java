@@ -24,6 +24,6 @@ public interface DroneDatabaseService {
 
     Future<Void> persist(Drone drone);
     Future<JsonObject> findById(String id);
-    Future<JsonObject> findBySerialNumber(String id);
+    Future<Drone> findBySerialNumber(String id);
     Future<JsonArray> findAll();
 }
