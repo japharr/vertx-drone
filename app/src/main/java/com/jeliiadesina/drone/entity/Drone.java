@@ -104,5 +104,57 @@ public class Drone {
 
     public void setState(State state) {
         this.state = state;
+    }@Override
+
+    public String toString() {
+        return "{" +
+            "\"serialNumber\" : \"" + serialNumber + "\"," +
+            "\"model\" : \"" + model + "\"," +
+            "\"weightLimit\" : " + weightLimit + "," +
+            "\"batteryCapacity\" : " + batteryCapacity + "," +
+            "\"state\" : \"" + state + "\"" +
+            "}";
+    }
+
+    public static class Builder {
+        private final Drone drone;
+
+        public Builder() {
+            drone = new Drone();
+        }
+
+        public Builder id(String id) {
+            drone.setId(id);
+            return this;
+        }
+
+        public Builder serialNumber(String serialNumber) {
+            drone.setSerialNumber(serialNumber);
+            return this;
+        }
+
+        public Builder model(Model model) {
+            drone.setModel(model);
+            return this;
+        }
+
+        public Builder weightLimit(Double weightLimit) {
+            drone.setWeightLimit(weightLimit);
+            return this;
+        }
+
+        public Builder batteryCapacity(Double batteryCapacity) {
+            drone.setBatteryCapacity(batteryCapacity);
+            return this;
+        }
+
+        public Builder state(State state) {
+            drone.setState(state);
+            return this;
+        }
+
+        public Drone build() {
+            return drone;
+        }
     }
 }

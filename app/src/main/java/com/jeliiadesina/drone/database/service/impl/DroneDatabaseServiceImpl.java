@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.database.service.impl;
 
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.enumeration.Model;
 import com.jeliiadesina.drone.entity.enumeration.State;
 import com.jeliiadesina.drone.exception.NotFoundException;
 import io.vertx.core.AsyncResult;
@@ -74,8 +75,8 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
         return pgPool
             .preparedQuery(selectOneBySerialNumber())
             .execute(Tuple.of(serialNumber))
-            .compose(this::mapToFirstResult)
-            .compose(jsonObject -> Future.succeededFuture(new Drone(jsonObject)));
+            .compose(this::mapToFirstRow)
+            .compose(row -> Future.succeededFuture(mapToDrone(row)));
     }
 
     @Override
@@ -94,6 +95,17 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
             .put("weightLimit", row.getValue("weight_limit"))
             .put("batteryCapacity", row.getValue("battery_capacity"))
             .put("state", row.getValue("state"));
+    }
+
+    private Drone mapToDrone(Row row) {
+        return new Drone.Builder()
+            .id((String) row.getValue("id"))
+            .serialNumber((String) row.getValue("serial_number"))
+            .model(Model.valueOf(row.getValue("model").toString()))
+            .weightLimit(Double.valueOf(row.getValue("weight_limit").toString()))
+            .batteryCapacity(Double.valueOf(row.getValue("battery_capacity").toString()))
+            .state(State.valueOf(row.getValue("state").toString()))
+            .build();
     }
 
     private Drone mapToDrone(JsonObject jsonObject) {
@@ -115,6 +127,14 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
     private Future<JsonObject> mapToFirstResult(RowSet<Row> rs) {
         if (rs.size() >= 1) {
             return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
+        } else {
+            return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
+        }
+    }
+
+    private Future<Row> mapToFirstRow(RowSet<Row> rs) {
+        if (rs.size() >= 1) {
+            return Future.future(p -> p.complete(rs.iterator().next()));
         } else {
             return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
         }
