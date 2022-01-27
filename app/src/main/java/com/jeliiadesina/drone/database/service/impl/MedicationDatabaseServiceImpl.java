@@ -110,6 +110,7 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
     private Medication mapToMedication(JsonObject jsonObject) {
         return new Medication(jsonObject);
     }
+
     private JsonArray mapToJsonArray(RowSet<Row> rows) {
         JsonArray data = new JsonArray();
         rows.forEach(row -> data.add(mapToJsonObject(row)));

@@ -5,6 +5,7 @@ import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.enumeration.Model;
 import com.jeliiadesina.drone.entity.enumeration.State;
 import com.jeliiadesina.drone.exception.NotFoundException;
+import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -75,8 +76,10 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
         return pgPool
             .preparedQuery(selectOneBySerialNumber())
             .execute(Tuple.of(serialNumber))
-            .compose(this::mapToFirstRow)
-            .compose(row -> Future.succeededFuture(mapToDrone(row)));
+            .compose(rows -> {
+                if(rows.size() < 1) return Future.succeededFuture(null);
+                else return Future.succeededFuture(mapToDrone(rows.iterator().next()));
+            });
     }
 
     @Override
@@ -128,7 +131,7 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
         if (rs.size() >= 1) {
             return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
         } else {
-            return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
+            return Future.failedFuture(new ResourceNotFoundException("drone.serialNumber.not-found"));
         }
     }
 
@@ -136,7 +139,7 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
         if (rs.size() >= 1) {
             return Future.future(p -> p.complete(rs.iterator().next()));
         } else {
-            return Future.failedFuture(new NotFoundException(404, "drone.serialNumber.not-found"));
+            return Future.succeededFuture(null);
         }
     }
 }

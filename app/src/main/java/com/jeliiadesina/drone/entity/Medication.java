@@ -82,4 +82,14 @@ public class Medication {
     public void setImage(String image) {
         this.image = image;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+            "\"name\" : \"" + name + "\"," +
+            "\"weight\" : " + weight + "," +
+            "\"code\" : \"" + code + "\"," +
+            "\"image\" : \"" + image + "\"" +
+            "}";
+    }
 }

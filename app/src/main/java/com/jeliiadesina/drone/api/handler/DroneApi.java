@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.api.handler;
 
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
@@ -29,9 +30,12 @@ public class DroneApi {
             droneDatabaseService.findBySerialNumber(serialNumber)
                 .onComplete(res -> {
                     if(res.succeeded()) {
-                        restResponse(ctx, 200, res.result().toJson().encode());
+                      if(res.result() == null)
+                        ctx.fail(new ResourceNotFoundException(
+                            String.format("Drone with serialNumber: %s, not found", serialNumber)));
+                      else restResponse(ctx, 200, res.result().toString());
                     } else {
-                        restResponse(ctx, 500, res.cause().getMessage());
+                        ctx.fail(res.cause());
                     }
                 });
         };

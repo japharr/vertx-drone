@@ -5,12 +5,14 @@ import com.jeliiadesina.drone.api.handler.HttpRequestValidator;
 import com.jeliiadesina.drone.api.handler.MedicationApi;
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
+import com.jeliiadesina.drone.util.FailureHandler;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.junit.internal.runners.statements.Fail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +71,7 @@ public class WebVerticle extends AbstractVerticle {
         router.get(DRONE_GET_MEDICATIONS_BY_DRONE_SERIALNUMBER).handler(MedicationApi.getByDroneSerialNumber(medicationDatabaseService, droneDatabaseService));
         router.post(DRONE_ADD_MEDICATION_TO_DRONE).handler(MedicationApi.addMedicationToDrone(medicationDatabaseService, droneDatabaseService));
 
+        router.route().failureHandler(new FailureHandler());
         return httpServer.
             requestHandler(router)
             .listen(httpServerPort);
