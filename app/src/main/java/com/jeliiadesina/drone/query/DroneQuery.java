@@ -13,7 +13,7 @@ public interface DroneQuery {
         return "SELECT count(*) FROM drones WHERE serial_number = $1";
     }
 
-    static String countById() {
+    static String countByIdQuery() {
         return "SELECT count(*) FROM drones WHERE uuid = $1";
     }
 

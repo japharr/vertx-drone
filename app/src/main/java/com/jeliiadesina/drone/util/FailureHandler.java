@@ -1,6 +1,7 @@
 package com.jeliiadesina.drone.util;
 
 import com.jeliiadesina.drone.exception.BadRequestException;
+import com.jeliiadesina.drone.exception.DroneException;
 import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.DecodeException;
@@ -17,6 +18,8 @@ public class FailureHandler implements Handler<RoutingContext> {
       restResponse(routingContext, 400, errorMessageToErrorBody(failure.getMessage()));
     } else if (failure instanceof ResourceNotFoundException) {
       restResponse(routingContext, 404, errorMessageToErrorBody(failure.getMessage()));
+    } else if (failure instanceof DroneException) {
+      restResponse(routingContext, 400, errorMessageToErrorBody(failure.getMessage()));
     } else if (failure instanceof DecodeException) {
       restResponse(routingContext, 400, errorMessageToErrorBody("Problems parsing JSON"));
     } else {

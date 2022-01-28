@@ -18,6 +18,8 @@ public class Medication {
     private String code;
     @JsonProperty("image")
     private String image;
+    @JsonProperty("droneId")
+    private String droneId;
 
     public Medication () {}
 
@@ -41,6 +43,7 @@ public class Medication {
         this.weight = other.weight;
         this.code = other.code;
         this.image = other.image;
+        this.droneId = other.droneId;
     }
 
     public String getId() {
@@ -81,6 +84,14 @@ public class Medication {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getDroneId() {
+        return droneId;
+    }
+
+    public void setDroneId(String droneId) {
+        this.droneId = droneId;
     }
 
     @Override

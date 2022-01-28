@@ -90,6 +90,26 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
             .flatMap(rs -> Future.succeededFuture(mapToJsonArray(rs)));
     }
 
+    @Override
+    public Future<Integer> countById(String id) {
+        return pgPool
+            .preparedQuery(countByIdQuery())
+            .execute(Tuple.of(id))
+            .map(rs -> rs.iterator().next())
+            .flatMap(row -> {
+                var count = row.getInteger(0);
+                return Future.future(p -> p.complete(count != null? count : 0));
+            });
+    }
+
+    @Override
+    public Future<State> updateState(String id, State state) {
+        return pgPool
+            .preparedQuery(updateWithState())
+            .execute(Tuple.of(id, state))
+            .compose(rs -> Future.succeededFuture(state));
+    }
+
     private JsonObject mapToJsonObject(Row row) {
         return new JsonObject()
             .put("id", row.getValue("id"))

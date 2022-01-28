@@ -35,7 +35,7 @@ public interface MedicationQuery {
 
     static String updateWithDroneId() {
         return "UPDATE medications SET drone_uuid = $2, last_modified_date = current_timestamp " +
-            "WHERE name = $1 RETURNING *";
+            "WHERE uuid = $1 RETURNING *";
     }
 
     static String selectTotalMedicationWeigh() {

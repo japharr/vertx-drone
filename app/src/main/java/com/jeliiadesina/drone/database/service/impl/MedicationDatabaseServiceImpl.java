@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+import static com.jeliiadesina.drone.entity.Medication01.selectTotalMedicationWeigh;
 import static com.jeliiadesina.drone.query.MedicationQuery.*;
 
 public class MedicationDatabaseServiceImpl implements MedicationDatabaseService {
@@ -91,6 +92,14 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
     }
 
     @Override
+    public Future<Double> totalDroneWeigh(String droneId) {
+        return pgPool
+            .preparedQuery(selectTotalMedicationWeigh())
+            .execute(Tuple.of(droneId))
+            .compose(rows -> Future.succeededFuture(mapToTotalDroneWeigh(rows)));
+    }
+
+    @Override
     public Future<Void> updateMedicationWithDrone(String medicationId, String droneId) {
         return pgPool
             .preparedQuery(updateWithDroneId())
@@ -104,7 +113,8 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
             .put("name", row.getValue("name"))
             .put("weight", row.getValue("weight"))
             .put("code", row.getValue("code"))
-            .put("image", row.getValue("image"));
+            .put("image", row.getValue("image"))
+            .put("droneId", row.getValue("drone_id"));
     }
 
     private Medication mapToMedication(JsonObject jsonObject) {
@@ -115,6 +125,15 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
         JsonArray data = new JsonArray();
         rows.forEach(row -> data.add(mapToJsonObject(row)));
         return data;
+    }
+
+    private Double mapToTotalDroneWeigh(RowSet<Row> rs) {
+        Double total = 0.0;
+        if (rs.size() >= 1) {
+            var row = rs.iterator().next();
+            total = row.getDouble("total_weight");
+        }
+        return total;
     }
 
     private Future<JsonObject> mapToFirstResult(RowSet<Row> rs) {

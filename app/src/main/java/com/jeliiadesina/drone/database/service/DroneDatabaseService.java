@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.database.service;
 
 import com.jeliiadesina.drone.database.service.impl.DroneDatabaseServiceImpl;
 import com.jeliiadesina.drone.entity.Drone;
+import com.jeliiadesina.drone.entity.enumeration.State;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -26,4 +27,6 @@ public interface DroneDatabaseService {
     Future<JsonObject> findById(String id);
     Future<Drone> findBySerialNumber(String id);
     Future<JsonArray> findAll();
+    Future<Integer> countById(String id);
+    Future<State> updateState(String id, State state);
 }
