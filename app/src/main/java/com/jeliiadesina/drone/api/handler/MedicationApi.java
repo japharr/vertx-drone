@@ -178,7 +178,26 @@ public class MedicationApi {
     return Future.succeededFuture(state);
   }
 
-  public static Handler<RoutingContext> available(MedicationDatabaseService medicationDatabaseService, DroneDatabaseService droneDatabaseService) {
+  public static Handler<RoutingContext> getAll(MedicationDatabaseService medicationDatabaseService, DroneDatabaseService droneDatabaseService) {
+    return ctx -> {
+      droneDatabaseService.findAll()
+        .compose(items -> fetchCurrentWeight(items, medicationDatabaseService))
+        .onComplete((res -> {
+          if (res.succeeded()) {
+            JsonArray array = new JsonArray();
+            res.result().forEach(item -> {
+              var drone = (JsonObject) item;
+              array.add(drone);
+            });
+            restResponse(ctx, 200, array.encode());
+          } else {
+            ctx.fail(res.cause());
+          }
+        }));
+    };
+  }
+
+  public static Handler<RoutingContext> getAvailable(MedicationDatabaseService medicationDatabaseService, DroneDatabaseService droneDatabaseService) {
     return ctx -> {
       droneDatabaseService.findAllAvailable()
         .compose(items -> fetchCurrentWeight(items, medicationDatabaseService))
@@ -212,13 +231,13 @@ public class MedicationApi {
       .compose(res -> Future.succeededFuture(res.list()));
   }
 
-  private static Future<List> sample(JsonArray drones, MedicationDatabaseService medicationDatabaseService) {
+  private static Future<List> fetchCurrentWeight(JsonArray drones, MedicationDatabaseService medicationDatabaseService) {
     List<Future> futures = new ArrayList<>();
     drones.forEach(item -> {
       var drone = (JsonObject) item;
       Future<Double> weightFuture = medicationDatabaseService.totalDroneWeigh(drone.getString("id"));
       Future<JsonObject> droneFuture = weightFuture.compose(weight -> {
-        drone.put("weight", weight);
+        drone.put("currentWeight", weight);
         return Future.succeededFuture(drone);
       });
       futures.add(droneFuture);
