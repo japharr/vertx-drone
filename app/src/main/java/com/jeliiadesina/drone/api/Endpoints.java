@@ -2,6 +2,7 @@ package com.jeliiadesina.drone.api;
 
 public final class Endpoints {
   public static final String DRONE_GET_DRONES = "/drones";
+  public static final String DRONE_GET_AVAILABLE_DRONES = "/available";
   public static final String DRONE_REGISTER_NEW_DRONE = "/register";
   public static final String DRONE_GET_DRONE_BY_SERIALNUMBER = "/drones/:serialNumber";
   public static final String DRONE_GET_MEDICATIONS_BY_DRONE_SERIALNUMBER = "/drones/:serialNumber/medications";

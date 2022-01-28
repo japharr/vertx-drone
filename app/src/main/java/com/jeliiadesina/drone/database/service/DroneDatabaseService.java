@@ -12,6 +12,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.pgclient.PgPool;
 
+import java.util.List;
+
 @ProxyGen
 public interface DroneDatabaseService {
 
@@ -29,4 +31,5 @@ public interface DroneDatabaseService {
     Future<JsonArray> findAll();
     Future<Integer> countById(String id);
     Future<State> updateState(String id, State state);
+    Future<List<Drone>> findAllAvailable();
 }

@@ -110,6 +110,14 @@ public class DroneDatabaseServiceImpl implements DroneDatabaseService {
             .compose(rs -> Future.succeededFuture(state));
     }
 
+    @Override
+    public Future<List<Drone>> findAllAvailable() {
+        return pgPool
+            .preparedQuery(selectAvailableDronesByState())
+            .execute()
+            .flatMap(rs -> Future.succeededFuture(mapToDrones(rs)));
+    }
+
     private JsonObject mapToJsonObject(Row row) {
         return new JsonObject()
             .put("id", row.getValue("id"))

@@ -26,6 +26,8 @@ public class Drone {
     private Double batteryCapacity;
     @JsonProperty("state")
     private State state;
+    @JsonProperty("currentWeight")
+    private Double currentWeight;
 
     public Drone () {}
 
@@ -50,6 +52,7 @@ public class Drone {
         this.weightLimit = other.weightLimit;
         this.batteryCapacity = other.batteryCapacity;
         this.state = other.state;
+        this.currentWeight = other.currentWeight;
     }
 
     public String getId() {
@@ -104,7 +107,17 @@ public class Drone {
 
     public void setState(State state) {
         this.state = state;
-    }@Override
+    }
+
+    public Double getCurrentWeight() {
+        return currentWeight;
+    }
+
+    public void setCurrentWeight(Double currentWeight) {
+        this.currentWeight = currentWeight;
+    }
+
+    @Override
 
     public String toString() {
         return "{" +
@@ -112,6 +125,7 @@ public class Drone {
             "\"model\" : \"" + model + "\"," +
             "\"weightLimit\" : " + weightLimit + "," +
             "\"batteryCapacity\" : " + batteryCapacity + "," +
+            "\"currentWeight\" : " + currentWeight + "," +
             "\"state\" : \"" + state + "\"" +
             "}";
     }
@@ -150,6 +164,11 @@ public class Drone {
 
         public Builder state(State state) {
             drone.setState(state);
+            return this;
+        }
+
+        public Builder currentWeight(Double currentWeight) {
+            drone.setCurrentWeight(currentWeight);
             return this;
         }
 

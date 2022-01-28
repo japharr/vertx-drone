@@ -17,8 +17,13 @@ import io.netty.handler.codec.http.HttpStatusClass;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static com.jeliiadesina.drone.util.RestApiUtil.decodeBodyToObject;
@@ -30,13 +35,13 @@ public class MedicationApi {
   public static Handler<RoutingContext> getAll(MedicationDatabaseService medicationDatabaseService) {
     return ctx -> {
       medicationDatabaseService.findAll()
-          .onComplete(res -> {
-            if (res.succeeded()) {
-              restResponse(ctx, 200, res.result().encode());
-            } else {
-              restResponse(ctx, 500, res.cause().getMessage());
-            }
-          });
+        .onComplete(res -> {
+          if (res.succeeded()) {
+            restResponse(ctx, 200, res.result().encode());
+          } else {
+            restResponse(ctx, 500, res.cause().getMessage());
+          }
+        });
     };
   }
 
@@ -45,13 +50,13 @@ public class MedicationApi {
       String name = ctx.pathParam("name");
 
       medicationDatabaseService.findByName(name)
-          .onComplete(res -> {
-            if (res.succeeded()) {
-              restResponse(ctx, 200, res.result().toString());
-            } else {
-              restResponse(ctx, 500, res.cause().getMessage());
-            }
-          });
+        .onComplete(res -> {
+          if (res.succeeded()) {
+            restResponse(ctx, 200, res.result().toString());
+          } else {
+            restResponse(ctx, 500, res.cause().getMessage());
+          }
+        });
     };
   }
 
@@ -60,13 +65,13 @@ public class MedicationApi {
       Medication medication = decodeBodyToObject(ctx, Medication.class);
 
       medicationDatabaseService.persist(medication)
-          .onComplete(res -> {
-            if (res.succeeded()) {
-              restResponse(ctx, 200);
-            } else {
-              restResponse(ctx, 500, res.cause().getMessage());
-            }
-          });
+        .onComplete(res -> {
+          if (res.succeeded()) {
+            restResponse(ctx, 200);
+          } else {
+            restResponse(ctx, 500, res.cause().getMessage());
+          }
+        });
     };
   }
 
@@ -75,14 +80,14 @@ public class MedicationApi {
       String serialNumber = ctx.pathParam("serialNumber");
 
       droneDatabaseService.findBySerialNumber(serialNumber)
-          .compose(drone -> medicationDatabaseService.findAllByDroneId(drone.getId()))
-          .onComplete(res -> {
-            if (res.succeeded()) {
-              restResponse(ctx, 200, res.result().encode());
-            } else {
-              restResponse(ctx, 500, res.cause().getMessage());
-            }
-          });
+        .compose(drone -> medicationDatabaseService.findAllByDroneId(drone.getId()))
+        .onComplete(res -> {
+          if (res.succeeded()) {
+            restResponse(ctx, 200, res.result().encode());
+          } else {
+            restResponse(ctx, 500, res.cause().getMessage());
+          }
+        });
     };
   }
 
@@ -96,31 +101,33 @@ public class MedicationApi {
       Future<Medication> medicationFuture = medicationDatabaseService.findByName(medDto.name());
 
       CompositeFuture.all(droneFuture, medicationFuture)
-          .compose(res -> verifyEntity(res.resultAt(0), res.resultAt(1)))
-          .compose(pair -> {
-            var drone = pair.first(); var medication = pair.second();
-            var totalWeigh = medicationDatabaseService.totalDroneWeigh(drone.getId());
-            return totalWeigh
-                .compose(weight -> verifyWeigh(pair, weight))
-                .compose(state -> Future.succeededFuture(new Triple<>(state, drone, medication)));
-          })
-          .compose(triple -> {
-            var drone = triple.second(); var medication = triple.third();
-            var state = triple.first();
+        .compose(res -> verifyEntity(res.resultAt(0), res.resultAt(1)))
+        .compose(pair -> {
+          var drone = pair.first();
+          var medication = pair.second();
+          var totalWeigh = medicationDatabaseService.totalDroneWeigh(drone.getId());
+          return totalWeigh
+            .compose(weight -> verifyWeigh(pair, weight))
+            .compose(state -> Future.succeededFuture(new Triple<>(state, drone, medication)));
+        })
+        .compose(triple -> {
+          var drone = triple.second();
+          var medication = triple.third();
+          var state = triple.first();
 
-            var updateFuture =  medicationDatabaseService.updateMedicationWithDrone(medication.getId(), drone.getId());
-            var updateState = droneDatabaseService.updateState(drone.getId(), state);
-            return updateFuture.compose(res -> updateState);
-          })
-          .onComplete(res -> {
-            if (res.succeeded()) {
-              restResponse(ctx, 200);
-            } else {
-              if(res.cause() instanceof DroneException) {
-                ctx.fail(new DroneException(res.cause().getMessage()));
-              } else ctx.fail(res.cause());
-            }
-          });
+          var updateFuture = medicationDatabaseService.updateMedicationWithDrone(medication.getId(), drone.getId());
+          var updateState = droneDatabaseService.updateState(drone.getId(), state);
+          return updateFuture.compose(res -> updateState);
+        })
+        .onComplete(res -> {
+          if (res.succeeded()) {
+            restResponse(ctx, 200);
+          } else {
+            if (res.cause() instanceof DroneException) {
+              ctx.fail(new DroneException(res.cause().getMessage()));
+            } else ctx.fail(res.cause());
+          }
+        });
     };
   }
 
@@ -159,15 +166,65 @@ public class MedicationApi {
     var expectedWeight = totalWeight + medication.getWeight();
     var droneWeightLimit = drone.getWeightLimit();
 
-    if(expectedWeight > droneWeightLimit) {
+    if (expectedWeight > droneWeightLimit) {
       return Future.failedFuture(new DroneException("drone.error.exceededLimit"));
     }
 
     var state = State.LOADING;
-    if(expectedWeight == droneWeightLimit) {
+    if (expectedWeight == droneWeightLimit) {
       state = State.LOADED;
     }
 
     return Future.succeededFuture(state);
+  }
+
+  public static Handler<RoutingContext> available(MedicationDatabaseService medicationDatabaseService, DroneDatabaseService droneDatabaseService) {
+    return ctx -> {
+      droneDatabaseService.findAllAvailable()
+        .compose(items -> fetchCurrentWeight(items, medicationDatabaseService))
+        .onComplete((res -> {
+          if (res.succeeded()) {
+            JsonArray array = new JsonArray();
+            res.result().forEach(item -> {
+              var drone = (Drone) item;
+              array.add(new JsonObject(drone.toString()));
+            });
+            restResponse(ctx, 200, array.encode());
+          } else {
+            ctx.fail(res.cause());
+          }
+        }));
+    };
+  }
+
+  private static Future<List> fetchCurrentWeight(List<Drone> drones, MedicationDatabaseService medicationDatabaseService) {
+    List<Future> futures = new ArrayList<>();
+    drones.forEach(drone -> {
+      Future<Double> weightFuture = medicationDatabaseService.totalDroneWeigh(drone.getId());
+      Future<Drone> droneFuture = weightFuture.compose(weight -> {
+        drone.setCurrentWeight(weight);
+        return Future.succeededFuture(drone);
+      });
+      futures.add(droneFuture);
+    });
+
+    return CompositeFuture.all(futures)
+      .compose(res -> Future.succeededFuture(res.list()));
+  }
+
+  private static Future<List> sample(JsonArray drones, MedicationDatabaseService medicationDatabaseService) {
+    List<Future> futures = new ArrayList<>();
+    drones.forEach(item -> {
+      var drone = (JsonObject) item;
+      Future<Double> weightFuture = medicationDatabaseService.totalDroneWeigh(drone.getString("id"));
+      Future<JsonObject> droneFuture = weightFuture.compose(weight -> {
+        drone.put("weight", weight);
+        return Future.succeededFuture(drone);
+      });
+      futures.add(droneFuture);
+    });
+
+    return CompositeFuture.all(futures)
+      .compose(res -> Future.succeededFuture(res.list()));
   }
 }
