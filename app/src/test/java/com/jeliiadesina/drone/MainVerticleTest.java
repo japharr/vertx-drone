@@ -1,5 +1,6 @@
 package com.jeliiadesina.drone;
 
+import com.jeliiadesina.drone.api.Endpoints;
 import com.jeliiadesina.drone.api.WebVerticle;
 import com.jeliiadesina.drone.database.DatabaseVerticle;
 import com.jeliiadesina.drone.migration.MigrationVerticle;
@@ -130,5 +131,165 @@ public class MainVerticleTest {
 
     List<Object> items = jsonPath.get("$");
     assertThat(items).isNotEmpty();
+  }
+
+  @Test
+  @Order(3)
+  @DisplayName("Fetch a drone")
+  void test_can_fetch_a_drone() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones/drone-01")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    JsonObject droneO1 = drones.get("drone-01");
+    List<String> props = asList("serialNumber", "model", "weightLimit", "batteryCapacity");
+    props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(droneO1.getString(prop)));
+    assertThat(jsonPath.getString("state")).isEqualTo("IDLE");
+  }
+
+  @Test
+  @Order(4)
+  @DisplayName("Create some medications")
+  void test_can_create_medications() {
+    medications.forEach((key, registration) -> {
+      given(requestSpecification)
+          .contentType(ContentType.JSON)
+          .body(registration.encode())
+          .post("/medications")
+          .then()
+          .assertThat()
+          .statusCode(HttpStatus.SC_OK);
+    });
+  }
+
+  @Test
+  @Order(5)
+  @DisplayName("Fetch all medications")
+  void test_can_fetch_registered_medications() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+  }
+
+  @Test
+  @Order(6)
+  @DisplayName("Fetch a medication")
+  void test_can_fetch_a_medication() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/medications/medication-01")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    JsonObject medication01 = medications.get("medication-01");
+    List<String> props = asList("name", "weight", "code");
+    props.forEach(prop -> assertThat(jsonPath.getString(prop)).isEqualTo(medication01.getString(prop)));
+  }
+
+  @Test
+  @Order(7)
+  @DisplayName("Confirm drones has no loaded medications")
+  void test_drone_has_no_medications_loaded() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isEmpty();
+  }
+
+  @Test
+  @Order(8)
+  @DisplayName("Load a medication to drone")
+  void test_can_load_medication_to_drone() {
+    JsonObject medication01 = new JsonObject()
+        .put("name", medications.get("medication-01").getString("name"));
+
+    String serialNumber = "drone-02";
+    JsonPath jsonPath = given(requestSpecification)
+        .contentType(ContentType.JSON)
+        .body(medication01.encode())
+        .post("/drones/" + serialNumber + "/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+  }
+
+  @Test
+  @Order(9)
+  @DisplayName("Confirm medication loaded to a particular drone")
+  void test_loaded_medications_is_not_empty() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+    assertThat(items).size().isEqualTo(1);
+  }
+
+  @Test
+  @Order(9)
+  @DisplayName("Fetch available drones")
+  void test_available_drones() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/available")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
+    assertThat(items).size().isEqualTo(1);
+  }
+
+  @Test
+  @Order(10)
+  @DisplayName("Load an already medication to drone")
+  void test_medication_already_loaded_same_to_drone() {
+    JsonObject medication01 = new JsonObject()
+        .put("name", medications.get("medication-01").getString("name"));
+
+    JsonPath jsonPath = given(requestSpecification)
+        .contentType(ContentType.JSON)
+        .body(medication01.encode())
+        .post("/drones/drone-02/medications")
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.SC_BAD_REQUEST)
+        .extract().jsonPath();
+
+    assertThat(jsonPath.getString("message")).isNotBlank();
+    assertThat(jsonPath.getString("message")).isEqualTo("drone.error.already-loaded");
   }
 }
