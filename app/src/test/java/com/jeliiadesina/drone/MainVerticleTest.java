@@ -7,6 +7,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -21,10 +22,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(VertxExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -34,23 +37,31 @@ public class MainVerticleTest {
 
   @Container
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13.4")
-    .withDatabaseName("test").withUsername("test").withPassword("test");
+      .withDatabaseName("test").withUsername("test").withPassword("test");
 
   @BeforeAll
   static void prepareSpec() {
     requestSpecification = new RequestSpecBuilder()
-      .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))
-      .setBaseUri("http://localhost:8084/")
-      .build();
+        .addFilters(asList(new ResponseLoggingFilter(), new RequestLoggingFilter()))
+        .setBaseUri("http://localhost:8084/")
+        .build();
   }
 
   @BeforeEach
   void prepare(Vertx vertx, VertxTestContext vtx) {
     JsonObject conf = new JsonObject()
-      .put("http", new JsonObject().put("port", 8084).put("context-path", "/api/v1"))
-      .put("db", new JsonObject().put("host", postgres.getContainerIpAddress()).put("port", postgres.getMappedPort(5432))
-        .put("database", "test").put("user", "test").put("password", "test"))
-      .put("i18n", new JsonObject().put("tags", new JsonArray().add("en").add("fr")));
+        .put("http", new JsonObject()
+            .put("port", 8084)
+            .put("context-path", "/api/v1"))
+        .put("eb.addresses", new JsonObject()
+            .put("db.drone", "eb.db.drone")
+            .put("db.medication", "eb.db.medication"))
+        .put("db", new JsonObject()
+            .put("host", postgres.getContainerIpAddress())
+            .put("port", postgres.getMappedPort(5432))
+            .put("database", "test").put("user", "test").put("password", "test")
+            .put("pool", new JsonObject().put("max-size", 5)))
+        .put("i18n", new JsonObject().put("tags", new JsonArray().add("en").add("fr")));
 
     DeploymentOptions options = new DeploymentOptions().setConfig(conf);
 
@@ -64,29 +75,29 @@ public class MainVerticleTest {
   }
 
   private final Map<String, JsonObject> drones = Map.of(
-    "drone-01", new JsonObject()
-      .put("serialNumber", "drone-01")
-      .put("model", "Middleweight")
-      .put("weightLimit", 20.0)
-      .put("batteryCapacity", 10.0),
+      "drone-01", new JsonObject()
+          .put("serialNumber", "drone-01")
+          .put("model", "Middleweight")
+          .put("weightLimit", 20.0)
+          .put("batteryCapacity", 10.0),
 
-    "drone-02", new JsonObject()
-      .put("serialNumber", "drone-02")
-      .put("model", "Cruiserweight")
-      .put("weightLimit", 40.0)
-      .put("batteryCapacity", 60.0)
+      "drone-02", new JsonObject()
+          .put("serialNumber", "drone-02")
+          .put("model", "Cruiserweight")
+          .put("weightLimit", 40.0)
+          .put("batteryCapacity", 60.0)
   );
 
   private final Map<String, JsonObject> medications = Map.of(
-    "medication-01", new JsonObject()
-      .put("name", "medication-01")
-      .put("weight", 30.0)
-      .put("code", "MED01"),
+      "medication-01", new JsonObject()
+          .put("name", "medication-01")
+          .put("weight", 30.0)
+          .put("code", "MED01"),
 
-    "medication-02", new JsonObject()
-      .put("name", "medication-02")
-      .put("weight", 20.0)
-      .put("code", "MED02")
+      "medication-02", new JsonObject()
+          .put("name", "medication-02")
+          .put("weight", 20.0)
+          .put("code", "MED02")
   );
 
   @Test
@@ -95,12 +106,29 @@ public class MainVerticleTest {
   void test_can_register_drones() {
     drones.forEach((key, registration) -> {
       given(requestSpecification)
-        .contentType(ContentType.JSON)
-        .body(registration.encode())
-        .post("/drones")
+          .contentType(ContentType.JSON)
+          .body(registration.encode())
+          .post("/register")
+          .then()
+          .assertThat()
+          .statusCode(HttpStatus.SC_OK);
+    });
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Fetch all drones")
+  void test_can_fetch_register_drones() {
+    JsonPath jsonPath = given()
+        .spec(requestSpecification)
+        .accept(ContentType.JSON)
+        .get("/drones")
         .then()
         .assertThat()
-        .statusCode(HttpStatus.SC_OK);
-    });
+        .statusCode(HttpStatus.SC_OK)
+        .extract().jsonPath();
+
+    List<Object> items = jsonPath.get("$");
+    assertThat(items).isNotEmpty();
   }
 }
