@@ -10,6 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 
 import static com.jeliiadesina.drone.util.RestApiUtil.decodeBodyToObject;
 import static com.jeliiadesina.drone.util.RestApiUtil.restResponse;
+import static com.jeliiadesina.drone.util.ValidationUtils.extract;
 
 public class HttpRequestValidator {
     public static Handler<RoutingContext> validateDrone() {
@@ -27,12 +28,7 @@ public class HttpRequestValidator {
                 return;
             }
 
-            JsonArray array = new JsonArray();
-            violations.forEach(r -> {
-                array.add(new JsonObject().put(r.messageKey(), r.message()));
-            });
-
-            restResponse(ctx, 400, array.encodePrettily());
+            restResponse(ctx, 400, extract(violations).encodePrettily());
         };
     }
 
@@ -51,12 +47,7 @@ public class HttpRequestValidator {
                 return;
             }
 
-            JsonArray array = new JsonArray();
-            violations.forEach(r -> {
-                array.add(new JsonObject().put(r.messageKey(), r.message()));
-            });
-
-            restResponse(ctx, 400, array.encodePrettily());
+            restResponse(ctx, 400, extract(violations).encodePrettily());
         };
     }
 }
