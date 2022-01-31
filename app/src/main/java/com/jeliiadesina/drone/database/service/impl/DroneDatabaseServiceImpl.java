@@ -4,7 +4,6 @@ import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.entity.Drone;
 import com.jeliiadesina.drone.entity.enumeration.Model;
 import com.jeliiadesina.drone.entity.enumeration.State;
-import com.jeliiadesina.drone.exception.NotFoundException;
 import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

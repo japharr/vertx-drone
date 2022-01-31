@@ -2,7 +2,7 @@ package com.jeliiadesina.drone.database.service.impl;
 
 import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
 import com.jeliiadesina.drone.entity.Medication;
-import com.jeliiadesina.drone.exception.NotFoundException;
+import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static com.jeliiadesina.drone.entity.Medication01.selectTotalMedicationWeigh;
 import static com.jeliiadesina.drone.query.MedicationQuery.*;
 
 public class MedicationDatabaseServiceImpl implements MedicationDatabaseService {
@@ -148,7 +147,7 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
         if (rs.size() >= 1) {
             return Future.future(p -> p.complete(mapToJsonObject(rs.iterator().next())));
         } else {
-            return Future.failedFuture(new NotFoundException(404, "medication.name.not-found"));
+            return Future.failedFuture(new ResourceNotFoundException("medication.name.not-found"));
         }
     }
 }
