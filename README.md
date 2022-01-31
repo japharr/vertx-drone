@@ -86,3 +86,6 @@ To run this project, run the below command from your terminal:
 java -jar app/build/libs/app-all.jar
 ```
 
+## Endpoints
+Get a list of the API requests and respective sample responses from [here](ENDPOINTS.md) 
+
