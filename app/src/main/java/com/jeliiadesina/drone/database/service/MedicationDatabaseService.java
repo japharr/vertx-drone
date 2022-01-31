@@ -28,4 +28,5 @@ public interface MedicationDatabaseService {
     Future<JsonArray> findAllByDroneId(String droneId);
     Future<Double> totalDroneWeigh(String droneId);
     Future<Void> updateMedicationWithDrone(String medicationId, String droneId);
+    Future<Void> updateMedicationWithImage(String medicationId, String imagePath);
 }

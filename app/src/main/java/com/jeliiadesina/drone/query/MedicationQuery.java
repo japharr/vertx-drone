@@ -30,7 +30,7 @@ public interface MedicationQuery {
 
     static String updateWithImage() {
         return "UPDATE medications SET image = $2, last_modified_date = current_timestamp " +
-            "WHERE name = $1 RETURNING *";
+            "WHERE uuid = $1 RETURNING *";
     }
 
     static String updateWithDroneId() {

@@ -6,8 +6,9 @@ import io.vertx.ext.web.RoutingContext;
 
 public class RestApiUtil {
     public static void restResponse(RoutingContext ctx, int statusCode, String body) {
-        ctx.response().putHeader("Content-Type", "application/json; charset=utf-8");
-        ctx.response().setStatusCode(statusCode)
+        ctx.response()
+            .putHeader("Content-Type", "application/json; charset=utf-8")
+            .setStatusCode(statusCode)
             .end(body);
     }
 

@@ -107,6 +107,14 @@ public class MedicationDatabaseServiceImpl implements MedicationDatabaseService 
             .compose(r -> Future.succeededFuture());
     }
 
+    @Override
+    public Future<Void> updateMedicationWithImage(String medicationId, String imagePath) {
+        return pgPool
+            .preparedQuery(updateWithImage())
+            .execute(Tuple.of(medicationId, imagePath))
+            .compose(r -> Future.succeededFuture());
+    }
+
     private JsonObject mapToJsonObject(Row row) {
         return new JsonObject()
             .put("id", row.getValue("id"))

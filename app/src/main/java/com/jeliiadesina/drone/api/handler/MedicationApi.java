@@ -4,26 +4,23 @@ import com.jeliiadesina.drone.api.model.MedDto;
 import com.jeliiadesina.drone.database.service.DroneDatabaseService;
 import com.jeliiadesina.drone.database.service.MedicationDatabaseService;
 import com.jeliiadesina.drone.entity.Drone;
-import com.jeliiadesina.drone.entity.Drone01;
 import com.jeliiadesina.drone.entity.Medication;
-import com.jeliiadesina.drone.entity.Medication01;
 import com.jeliiadesina.drone.entity.enumeration.State;
 import com.jeliiadesina.drone.exception.DroneException;
 import com.jeliiadesina.drone.exception.ResourceNotFoundException;
 import com.jeliiadesina.drone.util.Pair;
 import com.jeliiadesina.drone.util.Triple;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpStatusClass;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.jeliiadesina.drone.util.RestApiUtil.decodeBodyToObject;
@@ -245,5 +242,29 @@ public class MedicationApi {
 
     return CompositeFuture.all(futures)
       .compose(res -> Future.succeededFuture(res.list()));
+  }
+
+  public static Handler<RoutingContext> imageUpload(MedicationDatabaseService medicationDatabaseService) {
+    return ctx -> {
+      String name = ctx.pathParam("name");
+
+      Optional<FileUpload> opt = ctx.fileUploads().stream().findFirst();
+      if(!opt.isPresent() || !opt.get().contentType().contains("image")) {
+        ctx.fail(new DroneException("Please, upload an image"));
+        return;
+      }
+
+      FileUpload fileUpload = opt.get();
+      medicationDatabaseService.findByName(name)
+              .compose(med -> medicationDatabaseService
+                  .updateMedicationWithImage(med.getId(), fileUpload.uploadedFileName()))
+          .onComplete(rs -> {
+            if(rs.succeeded()) {
+              restResponse(ctx, 200, "Image uploaded successfully");
+            } else {
+              ctx.fail(rs.cause());
+            }
+          });
+    };
   }
 }

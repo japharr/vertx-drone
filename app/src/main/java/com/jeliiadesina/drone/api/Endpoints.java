@@ -11,6 +11,7 @@ public final class Endpoints {
   public static final String MEDICATION_GET_MEDICATIONS = "/medications";
   public static final String MEDICATION_REGISTER_NEW_MEDICATION = "/medications";
   public static final String MEDICATION_GET_MEDICATION_BY_NAME = "/medications/:name";
+  public static final String MEDICATION_UPLOAD_IMAGE = "/medications/:name/image";
 
   private Endpoints() {}
 }
