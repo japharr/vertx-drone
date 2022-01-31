@@ -61,31 +61,31 @@ While implementing your solution **please take care of the following requirement
 - JUnit tests are optional but advisable (if you have time);
 - Advice: Show us how you work through your commit history.
 
-## Stack
+### Stack
 - Java 16
 - Vertx
 - Postgresql
 - Gradle
 - Vertx-Junit5
 
-## Building
+### Building
 To build this project, run the below command from your terminal:
 ```
 ./gradlew build
 ```
 
-## Testing
+### Testing
 To test this project, run the below command from your terminal:
 ```
 ./gradlew test
 ```
 
-## Running
+### Running
 To run this project, run the below command from your terminal:
 ```
 java -jar app/build/libs/app-all.jar
 ```
 
-## Endpoints
+### Endpoints
 Get a list of the API requests and respective sample responses from [here](ENDPOINTS.md) 
 
