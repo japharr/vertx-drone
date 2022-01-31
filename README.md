@@ -1,11 +1,65 @@
 Drone App
 =
 
-## Introduction
+### Introduction
+
 There is a major new technology that is destined to be a disruptive force in the field of transportation: **the drone**. Just as the mobile phone allowed developing countries to leapfrog older technologies for personal communication, the drone has the potential to leapfrog traditional transportation infrastructure.
 
 Useful drone functions include delivery of small items that are (urgently) needed in locations with difficult access.
 
+---
+
+### Task description
+
+We have a fleet of **10 drones**. A drone is capable of carrying devices, other than cameras, and capable of delivering small loads. For our use case **the load is medications**.
+
+A **Drone** has:
+- serial number (100 characters max);
+- model (Lightweight, Middleweight, Cruiserweight, Heavyweight);
+- weight limit (500gr max);
+- battery capacity (percentage);
+- state (IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING).
+
+Each **Medication** has:
+- name (allowed only letters, numbers, ‘-‘, ‘_’);
+- weight;
+- code (allowed only upper case letters, underscore and numbers);
+- image (picture of the medication case).
+
+Develop a service via REST API that allows clients to communicate with the drones (i.e. **dispatch controller**). The specific communicaiton with the drone is outside the scope of this task.
+
+The service should allow:
+- registering a drone;
+- loading a drone with medication items;
+- checking loaded medication items for a given drone;
+- checking available drones for loading;
+- check drone battery level for a given drone;
+
+> Feel free to make assumptions for the design approach.
+
+---
+
+### Requirements
+
+While implementing your solution **please take care of the following requirements**:
+
+#### Functional requirements
+
+- There is no need for UI;
+- Prevent the drone from being loaded with more weight that it can carry;
+- Prevent the drone from being in LOADING state if the battery level is **below 25%**;
+- Introduce a periodic task to check drones battery levels and create history/audit event log for this.
+
+---
+
+#### Non-functional requirements
+
+- Input/output data must be in JSON format;
+- Your project must be buildable and runnable;
+- Your project must have a README file with build/run/test instructions (use DB that can be run locally, e.g. in-memory, via container);
+- Required data must be preloaded in the database.
+- JUnit tests are optional but advisable (if you have time);
+- Advice: Show us how you work through your commit history.
 
 ## Stack
 - Java 16
@@ -32,199 +86,3 @@ To run this project, run the below command from your terminal:
 java -jar app/build/libs/app-all.jar
 ```
 
-## REST API
-### Register a Drone
-
-### Request
-
-`POST /drones`
-
-    http POST :8080/api/v1/drones <<< '{
-        "serialNumber": "drone-03",
-        "model": "Middleweight",
-        "weightLimit": 88,
-        "batteryCapacity": 50
-    }'
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 133
-    
-    {
-        "serialNumber" : "drone-03",
-        "model" : "Middleweight",
-        "weightLimit" : 88.0,
-        "batteryCapacity" : 50.0,
-        "state" : "IDLE"
-    }
-
-### Get All Drones
-### Request
-
-`GET /drones`
-
-    http :8080/api/v1/drones
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 186
-    
-    [ {
-        "id" : "33b53000-fb62-4dd1-9afb-9a987bb69d5c",
-        "serialNumber" : "drone-03",
-        "model" : "Middleweight",
-        "weightLimit" : 88.0,
-        "batteryCapacity" : 50.0,
-        "state" : "IDLE"
-    } ]
-
-### Get a specific Drone
-### Request
-
-`GET /drones/:serialNumber`
-
-    http :8080/api/v1/drones/drone-03
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 182
-    
-    {
-        "id" : "33b53000-fb62-4dd1-9afb-9a987bb69d5c",
-        "serialNumber" : "drone-03",
-        "model" : "Middleweight",
-        "weightLimit" : 88.0,
-        "batteryCapacity" : 50.0,
-        "state" : "IDLE"
-    }
-
-### Create a Medication
-
-### Request
-
-`POST /medications`
-
-    http POST :8080/api/v1/medications <<< '{
-        "name": "medication-01",
-        "code": "SAMPLE",
-        "weight": 2
-    }'
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 87
-    
-    {
-        "name" : "medication-01",
-        "weight" : 2.0,
-        "code" : "SAMPLE",
-        "image" : null
-    }
-
-### Get All Medications
-### Request
-
-`GET /medications`
-
-    http :8080/api/v1/medications
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 186
-    
-    [ {
-    "id" : "4e683570-5cbe-4f3e-b3c4-f311a3011d29",
-    "name" : "medication-01",
-    "weight" : 2.0,
-    "code" : "SAMPLE",
-    "image" : null,
-    "droneId" : null
-    } ]
-
-### Get a specific Medication
-### Request
-
-`GET /medications/:name`
-
-    http :8080/api/v1/medications/medication-01
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 182
-    
-    {
-        "id" : "4e683570-5cbe-4f3e-b3c4-f311a3011d29",
-        "name" : "medication-01",
-        "weight" : 2.0,
-        "code" : "SAMPLE",
-        "image" : null,
-        "droneId" : null
-    }
-
-### Get All available drones Drone
-### Request
-
-`GET /drones?state=AVAILABLE`
-
-    http :8080/api/v1/drones?state=AVAILABLE
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 194
-    
-    [ {
-        "id" : "33b53000-fb62-4dd1-9afb-9a987bb69d5c",
-        "serialNumber" : "drone-03",
-        "model" : "Middleweight",
-        "weightLimit" : 88.0,
-        "batteryCapacity" : 50.0,
-        "state" : "IDLE"
-    } ]
-
-### Load a Medication to a Drone
-
-### Request
-
-`POST /drones/:serialNumber/medications`
-
-    http POST :8080/api/v1/drones/drone-03/medications <<< '{
-        "name": "medication-01"
-    }'
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 61
-    
-    {
-        "name" : "medication-01",
-        "serialNumber" : "drone-03"
-    }
-
-### Get All loaded Medications to a specific Drone
-### Request
-
-`GET /drones/:serialNumber/medications`
-
-    http :8080/api/v1/drones/drone-03/medications
-
-### Response
-
-    HTTP/1.1 200 OK
-    content-length: 194
-    
-    [ {
-        "id" : "4e683570-5cbe-4f3e-b3c4-f311a3011d29",
-        "name" : "medication-01",
-        "weight" : 2.0,
-        "code" : "SAMPLE",
-        "image" : null,
-        "droneId" : "33b53000-fb62-4dd1-9afb-9a987bb69d5c"
-    } ]
